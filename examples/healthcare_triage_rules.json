@@ -1,0 +1,143 @@
+{
+  "rule_set_name": "patient_triage_protocol",
+  "version": "1.0.0",
+  "description": "Example emergency department triage protocol for demonstrating policy intelligence",
+  "rules": [
+    {
+      "rule_id": "T001",
+      "name": "Critical Emergency",
+      "priority": 1,
+      "conditions": [
+        {
+          "feature": "heart_rate",
+          "operator": ">",
+          "value": 120,
+          "logical": "OR"
+        },
+        {
+          "feature": "blood_pressure_systolic",
+          "operator": "<",
+          "value": 90,
+          "logical": "OR"
+        },
+        {
+          "feature": "consciousness_level",
+          "operator": "<",
+          "value": 8
+        }
+      ],
+      "decision": {
+        "outcome": "immediate",
+        "confidence": 0.98,
+        "reasoning": "Life-threatening vital signs - immediate intervention required"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "T002",
+      "name": "Severe Symptoms",
+      "priority": 2,
+      "conditions": [
+        {
+          "feature": "pain_level",
+          "operator": ">=",
+          "value": 8,
+          "logical": "AND"
+        },
+        {
+          "feature": "symptom_duration_hours",
+          "operator": "<",
+          "value": 2
+        }
+      ],
+      "decision": {
+        "outcome": "urgent",
+        "confidence": 0.85,
+        "reasoning": "Severe acute symptoms requiring prompt attention"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "T003",
+      "name": "Chronic Condition - Stable",
+      "priority": 3,
+      "conditions": [
+        {
+          "feature": "chronic_condition",
+          "operator": "==",
+          "value": true,
+          "logical": "AND"
+        },
+        {
+          "feature": "pain_level",
+          "operator": "<=",
+          "value": 5,
+          "logical": "AND"
+        },
+        {
+          "feature": "vital_signs_stable",
+          "operator": "==",
+          "value": true
+        }
+      ],
+      "decision": {
+        "outcome": "routine",
+        "confidence": 0.75,
+        "reasoning": "Stable chronic condition - can wait for regular appointment"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "T004",
+      "name": "Moderate Symptoms",
+      "priority": 4,
+      "conditions": [
+        {
+          "feature": "pain_level",
+          "operator": "between",
+          "value": [4, 7],
+          "logical": "AND"
+        },
+        {
+          "feature": "heart_rate",
+          "operator": "between",
+          "value": [60, 100]
+        }
+      ],
+      "decision": {
+        "outcome": "standard",
+        "confidence": 0.70,
+        "reasoning": "Moderate symptoms with stable vitals"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "T005",
+      "name": "Minor Complaint",
+      "priority": 5,
+      "conditions": [
+        {
+          "feature": "pain_level",
+          "operator": "<=",
+          "value": 3,
+          "logical": "AND"
+        },
+        {
+          "feature": "symptom_duration_hours",
+          "operator": ">",
+          "value": 24
+        }
+      ],
+      "decision": {
+        "outcome": "routine",
+        "confidence": 0.80,
+        "reasoning": "Minor chronic symptoms - routine care appropriate"
+      },
+      "stop_on_match": true
+    }
+  ],
+  "default_decision": {
+    "outcome": "standard",
+    "reasoning": "Default triage to standard care - requires assessment"
+  }
+}
