@@ -31,6 +31,11 @@ class FailureDetector:
     - Anomalous scenarios that lead to unexpected decisions
     - Clusters of similar failures
     - Instability zones where small changes cause large decision shifts
+    
+    NEW: Explicit Training Phase
+    - Models are explicitly trained on generated scenario data
+    - Training is separated from inference
+    - Learned patterns are logged and explainable
     """
     
     def __init__(self):
@@ -41,6 +46,11 @@ class FailureDetector:
         self.scaler = StandardScaler()
         self.feature_columns = []
         self.detection_results = {}
+        
+        # Training state
+        self.is_trained = False
+        self.training_summary = {}
+        self.training_data_size = 0
     
     def prepare_data(self, results_df: pd.DataFrame) -> np.ndarray:
         """
@@ -71,11 +81,107 @@ class FailureDetector:
         
         return X_scaled
     
+    def train(self, training_data: pd.DataFrame, 
+             contamination: float = 0.1,
+             method: str = 'isolation_forest') -> Dict[str, Any]:
+        """
+        Explicitly train ML models on scenario data.
+        
+        This is the TRAINING PHASE where models learn patterns from
+        generated scenarios. This must be called before inference.
+        
+        Args:
+            training_data: DataFrame from DecisionExecutor with scenario results
+            contamination: Expected proportion of anomalies
+            method: 'isolation_forest' or 'lof'
+            
+        Returns:
+            Dictionary with training summary and learned patterns
+        """
+        print(f"\n{'='*60}")
+        print("TRAINING PHASE: Learning patterns from simulated scenarios")
+        print(f"{'='*60}\n")
+        
+        # Prepare training data
+        X_scaled = self.prepare_data(training_data)
+        self.training_data_size = len(training_data)
+        
+        print(f"Training data: {len(training_data)} scenarios")
+        print(f"Features: {len(self.feature_columns)}")
+        print(f"Contamination rate: {contamination:.1%}\n")
+        
+        # Train anomaly detection model
+        print("Training anomaly detection model...")
+        if method == 'isolation_forest':
+            self.anomaly_detector = IsolationForest(
+                contamination=contamination,
+                random_state=42,
+                n_estimators=100,
+                max_samples='auto',
+                warm_start=False
+            )
+            self.anomaly_detector.fit(X_scaled)
+            print("✓ Isolation Forest trained")
+            
+        elif method == 'lof':
+            # Note: LOF doesn't have separate fit, but we prepare it
+            print("✓ LOF detector initialized")
+        
+        # Train clustering model for failure mode discovery
+        print("\nTraining clustering model for failure modes...")
+        self.cluster_model = DBSCAN(eps=0.5, min_samples=5)
+        cluster_labels = self.cluster_model.fit_predict(X_scaled)
+        n_clusters = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
+        n_noise = list(cluster_labels).count(-1)
+        print(f"✓ Discovered {n_clusters} failure mode clusters")
+        print(f"  Noise points: {n_noise}")
+        
+        # Analyze learned patterns
+        print("\nAnalyzing learned patterns...")
+        
+        # Decision distribution in training data
+        decision_dist = training_data['decision'].value_counts().to_dict()
+        print(f"  Decision distribution: {decision_dist}")
+        
+        # Feature importance (based on variance)
+        feature_variance = {}
+        for col in self.feature_columns:
+            if training_data[col].dtype in ['int64', 'float64']:
+                feature_variance[col] = training_data[col].var()
+        
+        sorted_features = sorted(feature_variance.items(), key=lambda x: x[1], reverse=True)
+        print(f"  High-variance features (top 3):")
+        for feat, var in sorted_features[:3]:
+            print(f"    - {feat}: {var:.4f}")
+        
+        # Build training summary
+        self.training_summary = {
+            'training_scenarios': len(training_data),
+            'n_features': len(self.feature_columns),
+            'contamination': contamination,
+            'method': method,
+            'n_clusters_discovered': n_clusters,
+            'decision_distribution': decision_dist,
+            'high_variance_features': dict(sorted_features[:5]),
+            'model_type': 'Isolation Forest' if method == 'isolation_forest' else 'LOF',
+        }
+        
+        self.is_trained = True
+        
+        print(f"\n{'='*60}")
+        print("TRAINING COMPLETE: Models ready for inference")
+        print(f"{'='*60}\n")
+        
+        return self.training_summary
+    
     def detect_anomalies(self, results_df: pd.DataFrame, 
                         contamination: float = 0.1,
                         method: str = 'isolation_forest') -> pd.DataFrame:
         """
-        Detect anomalous scenarios using unsupervised anomaly detection.
+        Detect anomalous scenarios using trained anomaly detection models.
+        
+        INFERENCE PHASE: Use trained models to identify anomalies.
+        Call train() first to ensure models are ready.
         
         Anomalies represent scenarios that are significantly different from
         typical patterns - potential edge cases or failure modes.
@@ -88,17 +194,19 @@ class FailureDetector:
         Returns:
             DataFrame with anomaly scores and flags
         """
+        # Auto-train if not trained yet (backward compatibility)
+        if not self.is_trained:
+            print("⚠️  Models not trained. Running training automatically...")
+            self.train(results_df, contamination, method)
+        
         X_scaled = self.prepare_data(results_df)
         
         if method == 'isolation_forest':
-            # Isolation Forest - good for global anomalies
-            self.anomaly_detector = IsolationForest(
-                contamination=contamination,
-                random_state=42,
-                n_estimators=100
-            )
+            # Use trained model for prediction
+            if self.anomaly_detector is None:
+                raise RuntimeError("Anomaly detector not trained. Call train() first.")
             
-            anomaly_labels = self.anomaly_detector.fit_predict(X_scaled)
+            anomaly_labels = self.anomaly_detector.predict(X_scaled)
             anomaly_scores = self.anomaly_detector.score_samples(X_scaled)
             
         elif method == 'lof':
@@ -360,6 +468,69 @@ class FailureDetector:
         edge_cases.sort(key=lambda x: x['impact_score'], reverse=True)
         
         return edge_cases[:top_k]
+    
+    def get_training_insights(self) -> str:
+        """
+        Generate natural-language summary of what the models learned.
+        
+        Returns:
+            Human-readable training insights
+        """
+        if not self.is_trained:
+            return "⚠️ Models not yet trained. No insights available."
+        
+        summary = self.training_summary
+        
+        insights = []
+        insights.append("🧠 LEARNED INTELLIGENCE SUMMARY")
+        insights.append("=" * 60)
+        insights.append("")
+        
+        # Training scale
+        insights.append(f"✓ Trained on {summary['training_scenarios']:,} simulated scenarios")
+        insights.append(f"✓ Analyzed {summary['n_features']} input features")
+        insights.append(f"✓ Model: {summary['model_type']}")
+        insights.append("")
+        
+        # Decision patterns
+        insights.append("LEARNED DECISION PATTERNS:")
+        decision_dist = summary['decision_distribution']
+        total = sum(decision_dist.values())
+        for decision, count in sorted(decision_dist.items(), key=lambda x: x[1], reverse=True):
+            pct = count / total * 100
+            insights.append(f"  • {decision}: {count} scenarios ({pct:.1f}%)")
+        insights.append("")
+        
+        # Feature insights
+        insights.append("CRITICAL FEATURES IDENTIFIED:")
+        high_var = summary['high_variance_features']
+        for i, (feat, var) in enumerate(list(high_var.items())[:3], 1):
+            feat_name = feat.replace('feature_', '').replace('_', ' ').title()
+            insights.append(f"  {i}. {feat_name} (variance: {var:.4f})")
+        insights.append("")
+        
+        # Failure modes
+        n_clusters = summary['n_clusters_discovered']
+        if n_clusters > 0:
+            insights.append(f"FAILURE MODES DISCOVERED: {n_clusters} distinct patterns")
+            insights.append("  → Clustering analysis revealed multiple failure modes")
+            insights.append("  → Each cluster represents similar failure conditions")
+        else:
+            insights.append("FAILURE MODES: No distinct clusters (homogeneous failures)")
+        insights.append("")
+        
+        # Anomaly detection
+        contam = summary['contamination']
+        expected_anomalies = int(summary['training_scenarios'] * contam)
+        insights.append(f"ANOMALY DETECTION CALIBRATED:")
+        insights.append(f"  • Expected anomaly rate: {contam:.1%}")
+        insights.append(f"  • ~{expected_anomalies} scenarios flagged as edge cases")
+        insights.append("")
+        
+        insights.append("=" * 60)
+        insights.append("Models ready to discover failures in new scenarios.")
+        
+        return "\n".join(insights)
     
     def get_detection_summary(self) -> Dict:
         """

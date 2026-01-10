@@ -343,3 +343,72 @@ class ScenarioGenerator:
                 for name, spec in self.feature_specs.items()
             }
         }
+    
+    def generate_training_dataset(self, 
+                                 n_scenarios: int = 5000,
+                                 include_edge_cases: bool = True,
+                                 include_adversarial: bool = True) -> List[Dict]:
+        """
+        Generate comprehensive training dataset for ML model training.
+        
+        This method creates a large, diverse dataset suitable for training
+        anomaly detection and clustering models. Includes:
+        - Normal cases (majority)
+        - Boundary cases
+        - Edge cases
+        - Adversarial cases (if enabled)
+        
+        Args:
+            n_scenarios: Target number of scenarios (may generate slightly more)
+            include_edge_cases: Include systematic edge case exploration
+            include_adversarial: Include adversarial boundary cases
+            
+        Returns:
+            List of scenario dictionaries
+            
+        Example:
+            >>> generator = ScenarioGenerator(feature_specs)
+            >>> training_data = generator.generate_training_dataset(10000)
+            >>> # Use for model training
+        """
+        print(f"\n{'='*60}")
+        print("GENERATING TRAINING DATASET")
+        print(f"{'='*60}\n")
+        
+        all_scenarios = []
+        
+        # 1. Normal cases (70% of total)
+        n_normal = int(n_scenarios * 0.7)
+        print(f"Generating {n_normal} normal scenarios...")
+        normal_scenarios = self.generate_monte_carlo(n_normal)
+        all_scenarios.extend(normal_scenarios)
+        print(f"  ✓ {len(normal_scenarios)} normal scenarios generated")
+        
+        # 2. Boundary cases (15% of total)
+        n_boundary = int(n_scenarios * 0.15)
+        print(f"\nGenerating {n_boundary} boundary scenarios...")
+        boundary_scenarios = self.generate(n_boundary, ScenarioType.BOUNDARY)
+        all_scenarios.extend(boundary_scenarios)
+        print(f"  ✓ {len(boundary_scenarios)} boundary scenarios generated")
+        
+        # 3. Edge cases (5% of total) - systematic exploration
+        if include_edge_cases:
+            n_per_feature = max(3, int(n_scenarios * 0.05 / len(self.feature_specs)))
+            print(f"\nGenerating edge cases ({n_per_feature} per feature)...")
+            edge_scenarios = self.generate_edge_cases(n_per_feature)
+            all_scenarios.extend(edge_scenarios)
+            print(f"  ✓ {len(edge_scenarios)} edge scenarios generated")
+        
+        # 4. Adversarial cases (10% of total)
+        if include_adversarial:
+            n_adversarial = int(n_scenarios * 0.10)
+            print(f"\nGenerating {n_adversarial} adversarial scenarios...")
+            adversarial_scenarios = self.generate(n_adversarial, ScenarioType.ADVERSARIAL)
+            all_scenarios.extend(adversarial_scenarios)
+            print(f"  ✓ {len(adversarial_scenarios)} adversarial scenarios generated")
+        
+        print(f"\n{'='*60}")
+        print(f"DATASET COMPLETE: {len(all_scenarios)} total scenarios")
+        print(f"{'='*60}\n")
+        
+        return all_scenarios
