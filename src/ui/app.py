@@ -14,8 +14,13 @@ import plotly.graph_objects as go
 from pathlib import Path
 import sys
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+# Add src to path - handle both when run from root and from src/ui
+current_dir = Path(__file__).parent
+root_dir = current_dir.parent.parent
+src_dir = root_dir / 'src'
+
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
 
 from policy_engine import RuleEngine
 from scenario_generator import ScenarioGenerator, FeatureSpec, ScenarioType
@@ -115,7 +120,7 @@ def section_define_system():
         rules_path = None
         
         if load_option == "Load Example (Credit Risk)":
-            example_path = Path(__file__).parent.parent / "examples" / "credit_risk_rules.json"
+            example_path = root_dir / "examples" / "credit_risk_rules.json"
             if example_path.exists():
                 rules_path = str(example_path)
                 st.success("✅ Example rules loaded")
