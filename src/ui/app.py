@@ -647,65 +647,85 @@ def section_discover_failures():
 
 
 def section_risk_dashboard():
-    """Section 4: Risk Dashboard."""
-    st.header("4️⃣ Risk Dashboard")
+    """Section 4: Risk Assessment & Quantification."""
+    st.markdown('<div class="section-header">Risk Assessment</div>', unsafe_allow_html=True)
     
     if st.session_state.results is None:
-        st.warning("⚠️ Please run analysis first (Section 3)")
+        st.markdown('<div class="warning-card">Please complete analysis in the Train & Discover section first.</div>', unsafe_allow_html=True)
         return
+    
+    st.markdown("""
+    Quantify systemic risk across multiple dimensions. Our evaluation focuses on metrics
+    that matter for decision system robustness—not prediction accuracy.
+    """)
+    
+    st.markdown("---")
     
     # Calculate risk scores
     if st.button("Calculate Risk Scores", type="primary"):
-        scorer = RiskScorer()
-        
-        # Score different risk factors
-        if st.session_state.failure_detector:
-            instabilities = st.session_state.failure_detector.detection_results.get('instabilities', [])
-            scorer.score_instability(instabilities)
-        
-        if st.session_state.executor:
-            # Find boundaries
-            feature_cols = [col for col in st.session_state.results.columns if col.startswith('feature_')]
-            boundaries = []
-            for col in feature_cols[:3]:  # Analyze first 3 features
-                feature_name = col.replace('feature_', '')
-                bounds = st.session_state.executor.find_decision_boundaries(feature_name)
-                boundaries.extend(bounds)
+        with st.spinner("Analyzing risk across multiple dimensions..."):
+            scorer = RiskScorer()
             
-            scorer.score_conflict_density(st.session_state.results, boundaries)
-        
-        scorer.score_coverage_gaps(st.session_state.results)
-        scorer.score_decision_concentration(st.session_state.results)
-        scorer.score_confidence_variance(st.session_state.results)
-        
-        st.session_state.risk_scorer = scorer
+            # Score different risk factors
+            if st.session_state.failure_detector:
+                instabilities = st.session_state.failure_detector.detection_results.get('instabilities', [])
+                scorer.score_instability(instabilities)
+            
+            if st.session_state.executor:
+                # Find boundaries
+                feature_cols = [col for col in st.session_state.results.columns if col.startswith('feature_')]
+                boundaries = []
+                for col in feature_cols[:3]:  # Analyze first 3 features
+                    feature_name = col.replace('feature_', '')
+                    bounds = st.session_state.executor.find_decision_boundaries(feature_name)
+                    boundaries.extend(bounds)
+                
+                scorer.score_conflict_density(st.session_state.results, boundaries)
+            
+            scorer.score_coverage_gaps(st.session_state.results)
+            scorer.score_decision_concentration(st.session_state.results)
+            scorer.score_confidence_variance(st.session_state.results)
+            
+            st.session_state.risk_scorer = scorer
+            st.markdown('<div class="success-card">Risk assessment complete</div>', unsafe_allow_html=True)
     
     # Display risk dashboard
     if st.session_state.risk_scorer:
         composite = st.session_state.risk_scorer.calculate_composite_risk_score()
         
         # Overall risk score
-        st.subheader("Overall Risk Assessment")
+        st.markdown('<div class="subsection-header">Overall Assessment</div>', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
             severity = composite['overall_severity']
             severity_class = f"risk-{severity}"
-            st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
-            st.markdown(f'<div class="{severity_class}" style="font-size: 2rem;">{severity.upper()}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div>Overall Severity</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-card" style="text-align: center;">', unsafe_allow_html=True)
+            st.markdown(f'<div class="{severity_class}" style="font-size: 2.5rem; margin-bottom: 0.5rem;">{severity.upper()}</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color: #64748b;">Overall Severity</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
             score = composite['composite_risk_score']
-            st.metric("Composite Risk Score", f"{score:.2f}", help="Scale: 0.0 (low) to 1.0 (critical)")
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Composite Risk Score", f"{score:.3f}", help="0.0 = minimal risk, 1.0 = critical risk")
+            st.markdown('</div>', unsafe_allow_html=True)
         
         with col3:
-            st.metric("Risk Factors Analyzed", len(composite.get('risk_breakdown', {})))
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Dimensions Analyzed", len(composite.get('risk_breakdown', {})))
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
         
         # Risk breakdown
-        st.subheader("Risk Factor Breakdown")
+        st.markdown('<div class="subsection-header">Risk Factor Analysis</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        Each dimension contributes to overall system risk. High scores in any dimension
+        indicate potential vulnerabilities requiring attention.
+        """)
         
         breakdown = composite.get('risk_breakdown', {})
         if breakdown:
@@ -713,7 +733,7 @@ def section_risk_dashboard():
                 {
                     'Risk Factor': k.replace('_', ' ').title(),
                     'Severity': v['severity'],
-                    'Contribution': v['contribution']
+                    'Contribution': round(v['contribution'], 4)
                 }
                 for k, v in breakdown.items()
             ])
@@ -731,41 +751,56 @@ def section_risk_dashboard():
                     'critical': '#dc2626'
                 }
             )
+            fig.update_layout(
+                showlegend=True,
+                xaxis_title="",
+                yaxis_title="Risk Contribution",
+                height=400
+            )
             st.plotly_chart(fig, use_container_width=True)
         
         # Detailed scores
-        with st.expander("View Detailed Risk Scores"):
+        with st.expander("View Detailed Metrics"):
             st.json(composite['detailed_scores'])
 
 
 def section_what_if():
-    """Section 5: What-If Rule Repair."""
-    st.header("5️⃣ What-If Rule Repair")
+    """Section 5: Policy Repair & What-If Analysis."""
+    st.markdown('<div class="section-header">Policy Repair</div>', unsafe_allow_html=True)
     
     if not st.session_state.rule_engine:
-        st.warning("⚠️ Please load rules first")
+        st.markdown('<div class="warning-card">Please load rules first in the Define System section.</div>', unsafe_allow_html=True)
         return
+    
+    st.markdown("""
+    Test policy modifications before deployment. Simulate the impact of rule changes,
+    compare risk profiles, and make data-driven decisions about policy adjustments.
+    """)
+    
+    st.markdown("---")
     
     # Initialize repair engine if not done
     if st.session_state.repair_engine is None and st.session_state.rule_engine is not None:
         st.session_state.repair_engine = PolicyRepairEngine(st.session_state.rule_engine)
     
-    st.subheader("Simulate Rule Modifications")
+    st.markdown('<div class="subsection-header">Modification Options</div>', unsafe_allow_html=True)
     
     # Show tabs for different workflows
-    tab1, tab2, tab3 = st.tabs(["Manual Modification", "Auto-Suggestions", "Comparison"])
+    tab1, tab2, tab3 = st.tabs(["Manual Changes", "Suggested Improvements", "Impact Comparison"])
     
     with tab1:
-        st.markdown("### Manual Rule Modification")
+        st.markdown("""
+        Manually configure rule modifications and simulate their impact on system risk.
+        """)
         
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.markdown("**Select Rule to Modify:**")
+            st.markdown("**Select Rule**")
             
             if st.session_state.rule_engine.rules:
                 rule_ids = [r['rule_id'] for r in st.session_state.rule_engine.rules['rules']]
-                selected_rule_id = st.selectbox("Rule ID", rule_ids)
+                selected_rule_id = st.selectbox("Rule ID", rule_ids, label_visibility="collapsed")
                 
                 # Show current rule
                 selected_rule = next(
@@ -773,7 +808,7 @@ def section_what_if():
                     if r['rule_id'] == selected_rule_id
                 )
                 
-                with st.expander("View Current Rule"):
+                with st.expander("View Current Rule Configuration"):
                     st.json(selected_rule)
                 
                 st.markdown("**Modification Type:**")
