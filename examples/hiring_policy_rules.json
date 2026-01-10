@@ -1,0 +1,191 @@
+{
+  "rule_set_name": "candidate_evaluation_system",
+  "version": "1.0.0",
+  "description": "Example hiring evaluation rules for demonstrating policy intelligence in recruitment",
+  "rules": [
+    {
+      "rule_id": "H001",
+      "name": "Exceptional Candidate",
+      "priority": 1,
+      "conditions": [
+        {
+          "feature": "years_experience",
+          "operator": ">=",
+          "value": 7,
+          "logical": "AND"
+        },
+        {
+          "feature": "technical_score",
+          "operator": ">=",
+          "value": 90,
+          "logical": "AND"
+        },
+        {
+          "feature": "cultural_fit_score",
+          "operator": ">=",
+          "value": 85
+        }
+      ],
+      "decision": {
+        "outcome": "fast_track",
+        "confidence": 0.95,
+        "reasoning": "Exceptional experience and assessment scores warrant fast-track hiring"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "H002",
+      "name": "Strong Recent Graduate",
+      "priority": 2,
+      "conditions": [
+        {
+          "feature": "years_experience",
+          "operator": "<=",
+          "value": 2,
+          "logical": "AND"
+        },
+        {
+          "feature": "education_level",
+          "operator": "in",
+          "value": ["masters", "phd"],
+          "logical": "AND"
+        },
+        {
+          "feature": "technical_score",
+          "operator": ">=",
+          "value": 85
+        }
+      ],
+      "decision": {
+        "outcome": "interview",
+        "confidence": 0.85,
+        "reasoning": "Strong educational background with solid technical skills"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "H003",
+      "name": "Insufficient Experience",
+      "priority": 3,
+      "conditions": [
+        {
+          "feature": "years_experience",
+          "operator": "<",
+          "value": 1,
+          "logical": "AND"
+        },
+        {
+          "feature": "technical_score",
+          "operator": "<",
+          "value": 70
+        }
+      ],
+      "decision": {
+        "outcome": "reject",
+        "confidence": 0.80,
+        "reasoning": "Insufficient experience combined with below-threshold technical assessment"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "H004",
+      "name": "Cultural Misalignment",
+      "priority": 4,
+      "conditions": [
+        {
+          "feature": "cultural_fit_score",
+          "operator": "<",
+          "value": 50
+        }
+      ],
+      "decision": {
+        "outcome": "reject",
+        "confidence": 0.75,
+        "reasoning": "Significant cultural misalignment may impact team dynamics"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "H005",
+      "name": "Promising Mid-Level",
+      "priority": 5,
+      "conditions": [
+        {
+          "feature": "years_experience",
+          "operator": "between",
+          "value": [3, 6],
+          "logical": "AND"
+        },
+        {
+          "feature": "technical_score",
+          "operator": ">=",
+          "value": 75,
+          "logical": "AND"
+        },
+        {
+          "feature": "leadership_score",
+          "operator": ">=",
+          "value": 70
+        }
+      ],
+      "decision": {
+        "outcome": "interview",
+        "confidence": 0.82,
+        "reasoning": "Solid mid-level candidate with leadership potential"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "H006",
+      "name": "Career Transition",
+      "priority": 6,
+      "conditions": [
+        {
+          "feature": "years_experience",
+          "operator": ">",
+          "value": 5,
+          "logical": "AND"
+        },
+        {
+          "feature": "relevant_experience_years",
+          "operator": "<",
+          "value": 2,
+          "logical": "AND"
+        },
+        {
+          "feature": "technical_score",
+          "operator": ">=",
+          "value": 80
+        }
+      ],
+      "decision": {
+        "outcome": "review",
+        "confidence": 0.65,
+        "reasoning": "Career transition candidate - strong scores but limited direct experience"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "H007",
+      "name": "Borderline Candidate",
+      "priority": 7,
+      "conditions": [
+        {
+          "feature": "technical_score",
+          "operator": "between",
+          "value": [65, 74]
+        }
+      ],
+      "decision": {
+        "outcome": "review",
+        "confidence": 0.60,
+        "reasoning": "Borderline technical assessment - requires detailed review"
+      },
+      "stop_on_match": true
+    }
+  ],
+  "default_decision": {
+    "outcome": "review",
+    "reasoning": "Candidate does not match predefined criteria - manual review required"
+  }
+}

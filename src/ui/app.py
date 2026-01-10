@@ -28,6 +28,7 @@ from decision_executor import DecisionExecutor
 from failure_detector import FailureDetector
 from risk_scoring import RiskScorer
 from explainability import ExplainabilityEngine
+from policy_repair import PolicyRepairEngine, RuleModification, ModificationType
 
 
 # Page configuration
@@ -90,6 +91,12 @@ def init_session_state():
         st.session_state.failure_detector = None
     if 'risk_scorer' not in st.session_state:
         st.session_state.risk_scorer = None
+    if 'executor' not in st.session_state:
+        st.session_state.executor = None
+    if 'repair_engine' not in st.session_state:
+        st.session_state.repair_engine = None
+    if 'modification_results' not in st.session_state:
+        st.session_state.modification_results = None
 
 
 def render_header():
@@ -414,40 +421,276 @@ def section_what_if():
         st.warning("⚠️ Please load rules first")
         return
     
+    # Initialize repair engine if not done
+    if st.session_state.repair_engine is None and st.session_state.rule_engine is not None:
+        st.session_state.repair_engine = PolicyRepairEngine(st.session_state.rule_engine)
+    
     st.subheader("Simulate Rule Modifications")
     
-    col1, col2 = st.columns(2)
+    # Show tabs for different workflows
+    tab1, tab2, tab3 = st.tabs(["Manual Modification", "Auto-Suggestions", "Comparison"])
     
-    with col1:
-        st.markdown("**Select Rule to Modify:**")
+    with tab1:
+        st.markdown("### Manual Rule Modification")
         
-        if st.session_state.rule_engine.rules:
-            rule_ids = [r['rule_id'] for r in st.session_state.rule_engine.rules['rules']]
-            selected_rule_id = st.selectbox("Rule ID", rule_ids)
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown("**Select Rule to Modify:**")
             
-            # Show current rule
-            selected_rule = next(
-                r for r in st.session_state.rule_engine.rules['rules']
-                if r['rule_id'] == selected_rule_id
+            if st.session_state.rule_engine.rules:
+                rule_ids = [r['rule_id'] for r in st.session_state.rule_engine.rules['rules']]
+                selected_rule_id = st.selectbox("Rule ID", rule_ids)
+                
+                # Show current rule
+                selected_rule = next(
+                    r for r in st.session_state.rule_engine.rules['rules']
+                    if r['rule_id'] == selected_rule_id
+                )
+                
+                with st.expander("View Current Rule"):
+                    st.json(selected_rule)
+                
+                st.markdown("**Modification Type:**")
+                mod_type = st.selectbox(
+                    "Choose modification",
+                    [
+                        "Adjust Threshold",
+                        "Change Priority",
+                        "Add Buffer Zone",
+                        "Modify Decision",
+                        "Disable Rule"
+                    ]
+                )
+                
+                # Parameters based on modification type
+                parameters = {}
+                
+                if mod_type == "Adjust Threshold":
+                    st.markdown("**Threshold Adjustment:**")
+                    condition_idx = st.number_input("Condition Index", min_value=0, 
+                                                   max_value=len(selected_rule['conditions'])-1, value=0)
+                    adjustment = st.slider("Adjustment Amount", -50.0, 50.0, 0.0, 0.5)
+                    parameters = {
+                        'condition_index': condition_idx,
+                        'adjustment': adjustment
+                    }
+                    mod_type_enum = ModificationType.ADJUST_THRESHOLD
+                    description = f"Adjust threshold in condition {condition_idx} by {adjustment}"
+                
+                elif mod_type == "Change Priority":
+                    new_priority = st.number_input("New Priority", min_value=1, value=selected_rule['priority'])
+                    parameters = {'new_priority': new_priority}
+                    mod_type_enum = ModificationType.CHANGE_PRIORITY
+                    description = f"Change priority from {selected_rule['priority']} to {new_priority}"
+                
+                elif mod_type == "Add Buffer Zone":
+                    buffer_pct = st.slider("Buffer Zone (%)", 5, 30, 10) / 100
+                    intermediate_decision = st.text_input("Intermediate Decision", "review")
+                    parameters = {
+                        'buffer_percent': buffer_pct,
+                        'intermediate_decision': intermediate_decision
+                    }
+                    mod_type_enum = ModificationType.ADD_BUFFER_ZONE
+                    description = f"Add {buffer_pct*100}% buffer zone with '{intermediate_decision}' decision"
+                
+                elif mod_type == "Modify Decision":
+                    new_outcome = st.text_input("New Decision Outcome", selected_rule['decision']['outcome'])
+                    new_reasoning = st.text_area("New Reasoning", selected_rule['decision']['reasoning'])
+                    parameters = {
+                        'decision_updates': {
+                            'outcome': new_outcome,
+                            'reasoning': new_reasoning
+                        }
+                    }
+                    mod_type_enum = ModificationType.MODIFY_DECISION
+                    description = f"Modify decision outcome to '{new_outcome}'"
+                
+                else:  # Disable Rule
+                    parameters = {}
+                    mod_type_enum = ModificationType.DISABLE_RULE
+                    description = f"Disable rule {selected_rule_id}"
+                
+                # Simulate button
+                if st.button("🔍 Simulate Impact", type="primary"):
+                    if st.session_state.scenarios and st.session_state.executor and st.session_state.risk_scorer:
+                        with st.spinner("Simulating impact..."):
+                            modification = RuleModification(
+                                rule_id=selected_rule_id,
+                                modification_type=mod_type_enum,
+                                parameters=parameters,
+                                description=description
+                            )
+                            
+                            impact = st.session_state.repair_engine.simulate_impact(
+                                modification,
+                                st.session_state.executor,
+                                st.session_state.scenarios[:500],  # Use subset for speed
+                                st.session_state.risk_scorer
+                            )
+                            
+                            st.session_state.modification_results = impact
+                            st.success("✅ Impact simulation complete!")
+                    else:
+                        st.error("Please run analysis in Section 3 first to generate test scenarios")
+        
+        with col2:
+            st.markdown("**Simulation Results:**")
+            
+            if st.session_state.modification_results:
+                impact = st.session_state.modification_results
+                
+                # Show recommendation
+                st.info(impact['recommendation'])
+                
+                # Risk comparison
+                st.markdown("**Risk Score Comparison:**")
+                col_a, col_b, col_c = st.columns(3)
+                
+                with col_a:
+                    st.metric(
+                        "Before",
+                        f"{impact['baseline']['composite_risk_score']:.3f}",
+                        help="Original composite risk score"
+                    )
+                
+                with col_b:
+                    st.metric(
+                        "After",
+                        f"{impact['modified']['composite_risk_score']:.3f}",
+                        delta=f"{impact['changes']['risk_delta']:.3f}",
+                        delta_color="inverse"
+                    )
+                
+                with col_c:
+                    severity_change = f"{impact['baseline']['overall_severity']} → {impact['modified']['overall_severity']}"
+                    st.metric("Severity", severity_change)
+                
+                # Decision distribution changes
+                st.markdown("**Decision Distribution Changes:**")
+                
+                shifts = impact['changes']['decision_shifts']
+                shift_data = []
+                for decision, values in shifts.items():
+                    shift_data.append({
+                        'Decision': decision,
+                        'Before': values['before'],
+                        'After': values['after'],
+                        'Change': values['delta']
+                    })
+                
+                st.dataframe(pd.DataFrame(shift_data))
+                
+                # Detailed metrics
+                with st.expander("View Detailed Metrics"):
+                    col_d1, col_d2 = st.columns(2)
+                    
+                    with col_d1:
+                        st.markdown("**Baseline Metrics:**")
+                        st.json(impact['baseline'])
+                    
+                    with col_d2:
+                        st.markdown("**Modified Metrics:**")
+                        st.json(impact['modified'])
+                
+                # Export modified rules
+                if st.button("💾 Export Modified Rules"):
+                    modified_rules = st.session_state.repair_engine.apply_modification(
+                        impact['modification']
+                    )
+                    st.session_state.repair_engine.export_modified_rules(
+                        modified_rules,
+                        '/tmp/modified_rules.json'
+                    )
+                    
+                    with open('/tmp/modified_rules.json', 'r') as f:
+                        rules_json = f.read()
+                    
+                    st.download_button(
+                        label="📥 Download Modified Rules",
+                        data=rules_json,
+                        file_name="modified_rules.json",
+                        mime="application/json"
+                    )
+    
+    with tab2:
+        st.markdown("### Auto-Generated Suggestions")
+        
+        if st.session_state.failure_detector and st.session_state.risk_scorer:
+            if st.button("Generate Suggestions", type="primary"):
+                with st.spinner("Analyzing issues and generating suggestions..."):
+                    suggestions = st.session_state.repair_engine.suggest_modifications(
+                        st.session_state.failure_detector.detection_results,
+                        st.session_state.risk_scorer.risk_scores
+                    )
+                    
+                    st.session_state.suggested_modifications = suggestions
+            
+            if hasattr(st.session_state, 'suggested_modifications'):
+                st.markdown(f"**{len(st.session_state.suggested_modifications)} suggestions generated:**")
+                
+                for i, suggestion in enumerate(st.session_state.suggested_modifications, 1):
+                    with st.expander(f"Suggestion {i}: {suggestion.description}"):
+                        st.markdown(f"**Modification Type:** {suggestion.modification_type.value}")
+                        st.markdown(f"**Target Rule:** {suggestion.rule_id}")
+                        st.json(suggestion.parameters)
+                        
+                        if st.button(f"Test This Suggestion", key=f"test_sug_{i}"):
+                            if st.session_state.scenarios and st.session_state.executor:
+                                impact = st.session_state.repair_engine.simulate_impact(
+                                    suggestion,
+                                    st.session_state.executor,
+                                    st.session_state.scenarios[:500],
+                                    st.session_state.risk_scorer
+                                )
+                                st.info(impact['recommendation'])
+                                st.metric(
+                                    "Risk Change",
+                                    f"{impact['changes']['risk_delta']:.3f}",
+                                    delta_color="inverse"
+                                )
+        else:
+            st.info("Run failure detection analysis in Section 3 to generate automatic suggestions")
+    
+    with tab3:
+        st.markdown("### Compare Multiple Modifications")
+        st.info("Compare the impact of different rule modifications side-by-side")
+        
+        if st.session_state.modification_results:
+            st.markdown("**Recent Modification:**")
+            impact = st.session_state.modification_results
+            
+            # Visualization comparing before/after
+            comparison_data = {
+                'Metric': ['Coverage Gap', 'Concentration', 'Composite Risk'],
+                'Baseline': [
+                    impact['baseline']['coverage_gap_rate'],
+                    impact['baseline']['concentration_score'],
+                    impact['baseline']['composite_risk_score']
+                ],
+                'Modified': [
+                    impact['modified']['coverage_gap_rate'],
+                    impact['modified']['concentration_score'],
+                    impact['modified']['composite_risk_score']
+                ]
+            }
+            
+            df_comp = pd.DataFrame(comparison_data)
+            
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name='Baseline', x=df_comp['Metric'], y=df_comp['Baseline']))
+            fig.add_trace(go.Bar(name='Modified', x=df_comp['Metric'], y=df_comp['Modified']))
+            
+            fig.update_layout(
+                title="Before vs After Comparison",
+                barmode='group',
+                yaxis_title="Score",
+                height=400
             )
             
-            st.json(selected_rule)
-            
-            st.markdown("**Suggested Modifications:**")
-            st.info("""
-            Based on detected failures:
-            1. Add buffer zones around decision boundaries
-            2. Consolidate overlapping rules
-            3. Adjust threshold values for stability
-            4. Add intermediate decision categories
-            """)
-    
-    with col2:
-        st.markdown("**Impact Simulation:**")
-        
-        if st.button("Simulate Impact"):
-            st.info("This feature allows you to modify rules and see the projected impact on risk scores before deploying changes.")
-            st.warning("⚠️ Feature in development - use explainability insights to guide manual modifications")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Simulate a modification in the Manual Modification tab to see comparison")
 
 
 def main():

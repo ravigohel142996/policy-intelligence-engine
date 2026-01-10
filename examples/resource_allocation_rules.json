@@ -1,0 +1,209 @@
+{
+  "rule_set_name": "resource_allocation_system",
+  "version": "1.0.0",
+  "description": "Example resource allocation rules for cloud infrastructure management",
+  "rules": [
+    {
+      "rule_id": "R001",
+      "name": "Critical Production Workload",
+      "priority": 1,
+      "conditions": [
+        {
+          "feature": "priority_level",
+          "operator": "==",
+          "value": "critical",
+          "logical": "AND"
+        },
+        {
+          "feature": "environment",
+          "operator": "==",
+          "value": "production",
+          "logical": "AND"
+        },
+        {
+          "feature": "resource_usage_percent",
+          "operator": ">",
+          "value": 80
+        }
+      ],
+      "decision": {
+        "outcome": "allocate_premium",
+        "confidence": 0.98,
+        "reasoning": "Critical production workload at high utilization requires premium resources"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R002",
+      "name": "Development with High Load",
+      "priority": 2,
+      "conditions": [
+        {
+          "feature": "environment",
+          "operator": "==",
+          "value": "development",
+          "logical": "AND"
+        },
+        {
+          "feature": "resource_usage_percent",
+          "operator": ">",
+          "value": 90
+        }
+      ],
+      "decision": {
+        "outcome": "allocate_standard",
+        "confidence": 0.75,
+        "reasoning": "Development environment under heavy load - allocate standard resources"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R003",
+      "name": "Idle Workload",
+      "priority": 3,
+      "conditions": [
+        {
+          "feature": "resource_usage_percent",
+          "operator": "<",
+          "value": 10,
+          "logical": "AND"
+        },
+        {
+          "feature": "idle_duration_hours",
+          "operator": ">",
+          "value": 24
+        }
+      ],
+      "decision": {
+        "outcome": "deallocate",
+        "confidence": 0.85,
+        "reasoning": "Workload idle for extended period - consider deallocation"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R004",
+      "name": "Budget Constrained",
+      "priority": 4,
+      "conditions": [
+        {
+          "feature": "budget_remaining_percent",
+          "operator": "<",
+          "value": 20,
+          "logical": "AND"
+        },
+        {
+          "feature": "priority_level",
+          "operator": "==",
+          "value": "low"
+        }
+      ],
+      "decision": {
+        "outcome": "queue",
+        "confidence": 0.80,
+        "reasoning": "Budget constraints with low priority - queue for later allocation"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R005",
+      "name": "Seasonal High Demand",
+      "priority": 5,
+      "conditions": [
+        {
+          "feature": "is_peak_season",
+          "operator": "==",
+          "value": true,
+          "logical": "AND"
+        },
+        {
+          "feature": "priority_level",
+          "operator": "in",
+          "value": ["high", "critical"],
+          "logical": "AND"
+        },
+        {
+          "feature": "resource_usage_percent",
+          "operator": ">",
+          "value": 70
+        }
+      ],
+      "decision": {
+        "outcome": "allocate_premium",
+        "confidence": 0.88,
+        "reasoning": "Peak season with high-priority workload requires premium allocation"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R006",
+      "name": "Batch Processing",
+      "priority": 6,
+      "conditions": [
+        {
+          "feature": "workload_type",
+          "operator": "==",
+          "value": "batch",
+          "logical": "AND"
+        },
+        {
+          "feature": "time_sensitivity",
+          "operator": "==",
+          "value": false
+        }
+      ],
+      "decision": {
+        "outcome": "allocate_spot",
+        "confidence": 0.82,
+        "reasoning": "Non-time-sensitive batch processing can use spot instances"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R007",
+      "name": "Standard Production",
+      "priority": 7,
+      "conditions": [
+        {
+          "feature": "environment",
+          "operator": "==",
+          "value": "production",
+          "logical": "AND"
+        },
+        {
+          "feature": "resource_usage_percent",
+          "operator": "between",
+          "value": [40, 70]
+        }
+      ],
+      "decision": {
+        "outcome": "allocate_standard",
+        "confidence": 0.78,
+        "reasoning": "Standard production workload with moderate utilization"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R008",
+      "name": "Testing Environment",
+      "priority": 8,
+      "conditions": [
+        {
+          "feature": "environment",
+          "operator": "in",
+          "value": ["testing", "staging"]
+        }
+      ],
+      "decision": {
+        "outcome": "allocate_minimal",
+        "confidence": 0.70,
+        "reasoning": "Testing/staging environments receive minimal resource allocation"
+      },
+      "stop_on_match": true
+    }
+  ],
+  "default_decision": {
+    "outcome": "queue",
+    "reasoning": "Request does not match allocation criteria - queued for manual review"
+  }
+}
