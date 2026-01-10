@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Policy Intelligence Engine - Rule Schema",
+  "description": "Schema for defining decision rules in a structured, validated format",
+  "type": "object",
+  "required": ["rule_set_name", "version", "rules"],
+  "properties": {
+    "rule_set_name": {
+      "type": "string",
+      "description": "Name of the decision system (e.g., 'loan_approval', 'hiring_policy')"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the rule set (e.g., '1.0.0')"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the rule set"
+    },
+    "rules": {
+      "type": "array",
+      "description": "List of decision rules",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "priority", "conditions", "decision"],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "Unique identifier for the rule"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the rule"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Priority order (lower number = higher priority)",
+            "minimum": 1
+          },
+          "conditions": {
+            "type": "array",
+            "description": "List of conditions that must be met",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["feature", "operator", "value"],
+              "properties": {
+                "feature": {
+                  "type": "string",
+                  "description": "Name of the feature/attribute to evaluate"
+                },
+                "operator": {
+                  "type": "string",
+                  "enum": ["==", "!=", ">", "<", ">=", "<=", "in", "not_in", "between"],
+                  "description": "Comparison operator"
+                },
+                "value": {
+                  "description": "Value to compare against (can be number, string, or array)"
+                },
+                "logical": {
+                  "type": "string",
+                  "enum": ["AND", "OR"],
+                  "default": "AND",
+                  "description": "Logical operator to combine with next condition"
+                }
+              }
+            }
+          },
+          "decision": {
+            "type": "object",
+            "required": ["outcome"],
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "description": "Decision outcome (e.g., 'approve', 'reject', 'review')"
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Confidence level in this decision"
+              },
+              "reasoning": {
+                "type": "string",
+                "description": "Explanation for the decision"
+              }
+            }
+          },
+          "stop_on_match": {
+            "type": "boolean",
+            "default": true,
+            "description": "Stop evaluating other rules if this rule matches"
+          }
+        }
+      }
+    },
+    "default_decision": {
+      "type": "object",
+      "description": "Default decision if no rules match",
+      "properties": {
+        "outcome": {
+          "type": "string"
+        },
+        "reasoning": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

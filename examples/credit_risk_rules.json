@@ -1,0 +1,143 @@
+{
+  "rule_set_name": "credit_risk_assessment",
+  "version": "1.0.0",
+  "description": "Example credit risk assessment rules for demonstrating policy intelligence",
+  "rules": [
+    {
+      "rule_id": "R001",
+      "name": "High Income Low Risk",
+      "priority": 1,
+      "conditions": [
+        {
+          "feature": "annual_income",
+          "operator": ">",
+          "value": 100000,
+          "logical": "AND"
+        },
+        {
+          "feature": "credit_score",
+          "operator": ">=",
+          "value": 750
+        }
+      ],
+      "decision": {
+        "outcome": "approve",
+        "confidence": 0.95,
+        "reasoning": "High income and excellent credit score"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R002",
+      "name": "Young High Earner",
+      "priority": 2,
+      "conditions": [
+        {
+          "feature": "age",
+          "operator": "<",
+          "value": 30,
+          "logical": "AND"
+        },
+        {
+          "feature": "annual_income",
+          "operator": ">",
+          "value": 75000,
+          "logical": "AND"
+        },
+        {
+          "feature": "credit_score",
+          "operator": ">=",
+          "value": 700
+        }
+      ],
+      "decision": {
+        "outcome": "approve",
+        "confidence": 0.85,
+        "reasoning": "Young professional with good income and credit"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R003",
+      "name": "High Risk - Low Credit",
+      "priority": 3,
+      "conditions": [
+        {
+          "feature": "credit_score",
+          "operator": "<",
+          "value": 600
+        }
+      ],
+      "decision": {
+        "outcome": "reject",
+        "confidence": 0.90,
+        "reasoning": "Credit score below acceptable threshold"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R004",
+      "name": "High Debt Burden",
+      "priority": 4,
+      "conditions": [
+        {
+          "feature": "debt_to_income",
+          "operator": ">",
+          "value": 0.45
+        }
+      ],
+      "decision": {
+        "outcome": "reject",
+        "confidence": 0.85,
+        "reasoning": "Debt-to-income ratio too high"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R005",
+      "name": "Moderate Risk - Manual Review",
+      "priority": 5,
+      "conditions": [
+        {
+          "feature": "credit_score",
+          "operator": "between",
+          "value": [600, 700],
+          "logical": "AND"
+        },
+        {
+          "feature": "annual_income",
+          "operator": ">",
+          "value": 40000
+        }
+      ],
+      "decision": {
+        "outcome": "review",
+        "confidence": 0.60,
+        "reasoning": "Moderate risk - requires manual review"
+      },
+      "stop_on_match": true
+    },
+    {
+      "rule_id": "R006",
+      "name": "Low Income",
+      "priority": 6,
+      "conditions": [
+        {
+          "feature": "annual_income",
+          "operator": "<",
+          "value": 30000
+        }
+      ],
+      "decision": {
+        "outcome": "reject",
+        "confidence": 0.75,
+        "reasoning": "Income below minimum threshold"
+      },
+      "stop_on_match": true
+    }
+  ],
+  "default_decision": {
+    "outcome": "review",
+    "reasoning": "Case does not match any specific rule - manual review required"
+  }
+}
