@@ -2,7 +2,7 @@
 
 > **An AI system that stress-tests human decision rules to discover hidden failures, conflicts, and systemic risk before they impact the real world.**
 
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
 
@@ -91,6 +91,12 @@ Interface Layer
 ---
 
 ## 🚀 Quick Start
+
+### Prerequisites
+
+**Supported Python Versions:** 3.9, 3.10, 3.11
+
+This system requires Python 3.9 or higher due to modern type hinting syntax and dependency compatibility requirements.
 
 ### Installation
 
