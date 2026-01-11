@@ -891,13 +891,13 @@ def section_discover_failures():
     st.markdown('<div class="section-header">Failure Discovery</div>', unsafe_allow_html=True)
     
     if not st.session_state.rule_engine or not st.session_state.scenarios:
-        st.markdown('<div class="warning-card">Please load rules and generate scenarios first.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="warning-card">Load rules and generate scenarios first.</div>', unsafe_allow_html=True)
         return
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown('<div class="subsection-header">Execute & Train</div>', unsafe_allow_html=True)
+        st.markdown('<div class="subsection-header">Execute Analysis</div>', unsafe_allow_html=True)
         
         contamination = st.slider(
             "Expected Anomaly Rate",
@@ -915,7 +915,7 @@ def section_discover_failures():
                 results_df = executor.execute_batch(st.session_state.scenarios)
                 st.session_state.results = results_df
                 st.session_state.executor = executor
-                st.markdown('<div class="success-card">✓ Executed all scenarios</div>', unsafe_allow_html=True)
+                st.markdown('<div class="success-card">Scenarios executed</div>', unsafe_allow_html=True)
             
             # Step 2: Train ML models
             with st.spinner("Step 2/4: Training ML models..."):
@@ -923,7 +923,7 @@ def section_discover_failures():
                 training_summary = detector.train(results_df, contamination=contamination)
                 st.session_state.training_summary = training_summary
                 st.session_state.training_complete = True
-                st.markdown('<div class="success-card">✓ Models trained successfully</div>', unsafe_allow_html=True)
+                st.markdown('<div class="success-card">Models trained successfully</div>', unsafe_allow_html=True)
             
             # Step 3: Detect anomalies
             with st.spinner("Step 3/4: Detecting anomalies..."):
@@ -932,16 +932,16 @@ def section_discover_failures():
                 
                 st.session_state.failure_detector = detector
                 st.session_state.results = results_with_anomalies
-                st.markdown('<div class="success-card">✓ Anomalies identified</div>', unsafe_allow_html=True)
+                st.markdown('<div class="success-card">Anomalies identified</div>', unsafe_allow_html=True)
             
             # Step 4: Test instability
             with st.spinner("Step 4/4: Testing instability..."):
                 sample_size = min(50, len(st.session_state.scenarios))
                 sample_scenarios = st.session_state.scenarios[:sample_size]
                 instabilities = detector.detect_instability(executor, sample_scenarios, n_perturbations=10)
-                st.markdown('<div class="success-card">✓ Analysis complete</div>', unsafe_allow_html=True)
+                st.markdown('<div class="success-card">Analysis complete</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="success-card"><strong>Complete</strong> — All models trained and failures identified</div>', unsafe_allow_html=True)
+            st.markdown('<div class="success-card"><strong>Complete:</strong> All models trained and failures identified</div>', unsafe_allow_html=True)
     
     with col2:
         if st.session_state.training_complete and st.session_state.training_summary:
@@ -1012,7 +1012,7 @@ def section_risk_dashboard():
     st.markdown('<div class="section-header">Risk Dashboard</div>', unsafe_allow_html=True)
     
     if st.session_state.results is None:
-        st.markdown('<div class="warning-card">Please complete analysis in Discover Failures section first.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="warning-card">Complete analysis in Discover Failures section first.</div>', unsafe_allow_html=True)
         return
     
     # Calculate risk scores
