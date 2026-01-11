@@ -725,7 +725,8 @@ def section_define_system():
         load_option = st.radio(
             "Configuration Source",
             ["Example: Credit Risk Assessment", "Upload Custom Rules"],
-            horizontal=True
+            horizontal=True,
+            label_visibility="visible"
         )
         
         rules_path = None
@@ -734,7 +735,7 @@ def section_define_system():
             example_path = root_dir / "examples" / "credit_risk_rules.json"
             if example_path.exists():
                 rules_path = str(example_path)
-                st.markdown('<div class="success-card">Example rules ready to load</div>', unsafe_allow_html=True)
+                st.markdown('<div class="info-card">Example rules ready to load</div>', unsafe_allow_html=True)
             else:
                 st.error("Example file not found")
         else:
@@ -755,7 +756,7 @@ def section_define_system():
                 
                 summary = engine.get_rule_summary()
                 st.markdown(
-                    f'<div class="success-card"><strong>Rules loaded:</strong> {summary["rule_set_name"]}</div>',
+                    f'<div class="success-card"><strong>System loaded:</strong> {summary["rule_set_name"]}</div>',
                     unsafe_allow_html=True
                 )
                 
