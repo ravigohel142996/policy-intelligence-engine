@@ -591,7 +591,7 @@ def section_landing():
                         conflict_reason = "Overlapping decision boundaries identified"
                     else:
                         conflict_reason = "No direct rule conflicts detected"
-            except:
+            except Exception:
                 conflict_reason = "Boundary detection not available"
         
         st.markdown('<div class="supporting-signal-card">', unsafe_allow_html=True)
@@ -627,7 +627,7 @@ def section_landing():
         coverage_pct = 0
         coverage_reason = "Scenario generation required"
         
-        if st.session_state.results is not None and st.session_state.scenarios:
+        if st.session_state.results is not None and st.session_state.scenarios and len(st.session_state.scenarios) > 0:
             coverage_pct = int((len(st.session_state.results) / len(st.session_state.scenarios)) * 100)
             
             if coverage_pct >= 100:
