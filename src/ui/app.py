@@ -34,46 +34,142 @@ from policy_repair import PolicyRepairEngine, RuleModification, ModificationType
 # Page configuration
 st.set_page_config(
     page_title="Policy Intelligence Engine",
-    page_icon="🔍",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enterprise styling
+# Premium Enterprise CSS - Calm, Minimal, Professional
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
+    /* Global Styles - Clean Enterprise Aesthetic */
+    .main {
+        background-color: #ffffff;
+        padding: 2rem;
     }
-    .sub-header {
-        font-size: 1.2rem;
-        color: #6b7280;
-        margin-bottom: 2rem;
+    
+    /* Typography Hierarchy */
+    .enterprise-title {
+        font-size: 2.25rem;
+        font-weight: 600;
+        color: #0f172a;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.75rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
+    
+    .enterprise-subtitle {
+        font-size: 1.125rem;
+        color: #475569;
+        font-weight: 400;
+        margin-bottom: 3rem;
+        line-height: 1.75;
+    }
+    
+    .section-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .subsection-header {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: #334155;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Card Styles */
     .metric-card {
-        background: #f9fafb;
+        background: #f8fafc;
         padding: 1.5rem;
         border-radius: 0.5rem;
-        border-left: 4px solid #3b82f6;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1rem;
     }
+    
+    .info-card {
+        background: #f0f9ff;
+        border-left: 3px solid #3b82f6;
+        padding: 1rem 1.5rem;
+        border-radius: 0.25rem;
+        margin: 1rem 0;
+    }
+    
+    .success-card {
+        background: #f0fdf4;
+        border-left: 3px solid #22c55e;
+        padding: 1rem 1.5rem;
+        border-radius: 0.25rem;
+        margin: 1rem 0;
+    }
+    
+    .warning-card {
+        background: #fffbeb;
+        border-left: 3px solid #f59e0b;
+        padding: 1rem 1.5rem;
+        border-radius: 0.25rem;
+        margin: 1rem 0;
+    }
+    
+    /* Risk Severity Colors - Professional */
     .risk-critical {
-        color: #dc2626;
+        color: #991b1b;
         font-weight: 600;
     }
     .risk-high {
-        color: #ea580c;
+        color: #c2410c;
         font-weight: 600;
     }
     .risk-medium {
-        color: #f59e0b;
+        color: #b45309;
         font-weight: 600;
     }
     .risk-low {
-        color: #10b981;
+        color: #047857;
         font-weight: 600;
+    }
+    
+    /* Buttons - Subtle */
+    .stButton>button {
+        background-color: #0f172a;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        padding: 0.625rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .stButton>button:hover {
+        background-color: #1e293b;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    }
+    
+    /* Spacing and Dividers */
+    .spacer {
+        margin: 2rem 0;
+    }
+    
+    hr {
+        border: none;
+        border-top: 1px solid #e2e8f0;
+        margin: 2rem 0;
+    }
+    
+    /* Hide Streamlit Branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* Clean Dataframe Styles */
+    .dataframe {
+        font-size: 0.875rem;
+        border: 1px solid #e2e8f0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -97,51 +193,148 @@ def init_session_state():
         st.session_state.repair_engine = None
     if 'modification_results' not in st.session_state:
         st.session_state.modification_results = None
+    if 'training_complete' not in st.session_state:
+        st.session_state.training_complete = False
+    if 'training_summary' not in st.session_state:
+        st.session_state.training_summary = None
+    if 'feature_specs' not in st.session_state:
+        st.session_state.feature_specs = None
 
 
 def render_header():
-    """Render page header."""
-    st.markdown('<div class="main-header">🔍 Policy Intelligence Engine</div>', unsafe_allow_html=True)
+    """Render premium enterprise header."""
     st.markdown(
-        '<div class="sub-header">Discover hidden failures, conflicts, and systemic risk in decision rules</div>',
+        '<div class="enterprise-title">Policy Intelligence Engine</div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        '<div class="enterprise-subtitle">'
+        'An enterprise decision-intelligence platform that discovers hidden failures, '
+        'conflicts, and systemic risk in rule-based systems before they impact operations.'
+        '</div>',
         unsafe_allow_html=True
     )
 
 
+def section_landing():
+    """Landing / Overview section - explain system purpose and value."""
+    st.markdown('<div class="section-header">Overview</div>', unsafe_allow_html=True)
+    
+    # Value proposition
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown("""
+        ### What This System Does
+        
+        Traditional testing validates **expected behavior**. This system discovers **what you didn't anticipate**.
+        
+        Human-defined decision rules power critical systems across domains—from credit approvals to 
+        healthcare triage. These rules are deterministic and explainable, yet they harbor hidden dangers:
+        
+        - **Rule Conflicts**: Overlapping conditions producing inconsistent decisions
+        - **Decision Instability**: Small input changes causing dramatic outcome shifts  
+        - **Coverage Gaps**: Unhandled edge cases falling through the cracks
+        - **Systemic Risk**: Failure modes that only emerge under stress or at scale
+        
+        This platform uses AI to stress-test your rules across thousands of simulated scenarios,
+        discovering failures before they impact real-world operations.
+        """)
+        
+        st.markdown("---")
+        
+        st.markdown("""
+        ### Why Failure Discovery Over Prediction
+        
+        This is not a predictive system optimizing for accuracy. It is an **intelligence system**
+        designed to find what breaks:
+        
+        - We don't optimize for F1 scores—we measure instability, conflict density, and risk concentration
+        - We don't test on historical data—we generate adversarial scenarios that don't exist yet
+        - We don't provide black-box predictions—every finding comes with explainable root causes
+        
+        **The goal**: Find the failures that matter before they do.
+        """)
+    
+    with col2:
+        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+        st.markdown("**System Status**")
+        
+        if st.session_state.rule_engine:
+            st.success("✓ Rules loaded")
+        else:
+            st.info("• Rules not loaded")
+        
+        if st.session_state.training_complete:
+            st.success(f"✓ Models trained")
+            if st.session_state.training_summary:
+                n_scenarios = st.session_state.training_summary.get('training_scenarios', 0)
+                st.caption(f"Trained on {n_scenarios:,} scenarios")
+        else:
+            st.info("• Models not trained")
+        
+        if st.session_state.results is not None:
+            st.success("✓ Analysis complete")
+        else:
+            st.info("• Analysis not run")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.markdown("**Next Steps**")
+        st.markdown("""
+        1. Define decision system
+        2. Generate test scenarios  
+        3. Train ML models
+        4. Discover failures
+        5. Assess risk
+        6. Test policy repairs
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
 def section_define_system():
     """Section 1: Define Decision System."""
-    st.header("1️⃣ Define Decision System")
+    st.markdown('<div class="section-header">Define Decision System</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.subheader("Load Rule Configuration")
+        st.markdown('<div class="subsection-header">Load Rule Configuration</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        Load your decision rules in JSON format. Rules define the logic that determines 
+        outcomes based on input conditions. Each rule specifies conditions, priorities, 
+        and decision outcomes.
+        """)
         
         # Option to load example or upload
         load_option = st.radio(
-            "Choose option:",
-            ["Load Example (Credit Risk)", "Upload Custom Rules"],
+            "Configuration Source",
+            ["Example: Credit Risk Assessment", "Upload Custom Rules"],
             horizontal=True
         )
         
         rules_path = None
         
-        if load_option == "Load Example (Credit Risk)":
+        if load_option == "Example: Credit Risk Assessment":
             example_path = root_dir / "examples" / "credit_risk_rules.json"
             if example_path.exists():
                 rules_path = str(example_path)
-                st.success("✅ Example rules loaded")
+                st.markdown('<div class="success-card">Example rules ready to load</div>', unsafe_allow_html=True)
             else:
                 st.error("Example file not found")
         else:
-            uploaded_file = st.file_uploader("Upload rules (JSON)", type=['json'])
+            uploaded_file = st.file_uploader("Select JSON file", type=['json'], label_visibility="collapsed")
             if uploaded_file:
                 # Save temporarily
                 temp_path = Path("/tmp/uploaded_rules.json")
                 with open(temp_path, 'wb') as f:
                     f.write(uploaded_file.getvalue())
                 rules_path = str(temp_path)
-                st.success("✅ Custom rules uploaded")
+                st.markdown('<div class="success-card">Custom rules uploaded successfully</div>', unsafe_allow_html=True)
         
         # Load rules
         if rules_path and st.button("Load Rules", type="primary"):
@@ -150,7 +343,10 @@ def section_define_system():
                 st.session_state.rule_engine = engine
                 
                 summary = engine.get_rule_summary()
-                st.success(f"✅ Rules loaded successfully: {summary['rule_set_name']}")
+                st.markdown(
+                    f'<div class="success-card"><strong>Rules loaded:</strong> {summary["rule_set_name"]}</div>',
+                    unsafe_allow_html=True
+                )
                 
             except Exception as e:
                 st.error(f"Error loading rules: {str(e)}")
@@ -159,228 +355,377 @@ def section_define_system():
         if st.session_state.rule_engine:
             summary = st.session_state.rule_engine.get_rule_summary()
             
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
             st.metric("Rule Set", summary['rule_set_name'])
             st.metric("Total Rules", summary['total_rules'])
             st.metric("Unique Features", summary['unique_features'])
-            st.metric("Decision Types", len(summary['decision_outcomes']))
+            st.metric("Decision Outcomes", len(summary['decision_outcomes']))
+            st.markdown('</div>', unsafe_allow_html=True)
             
-            with st.expander("View Rules"):
+            with st.expander("View Rule Details"):
                 for rule in st.session_state.rule_engine.rules['rules']:
                     st.markdown(f"**{rule['rule_id']}**: {rule.get('name', 'Unnamed')}")
-                    st.caption(f"Priority: {rule['priority']} → Decision: {rule['decision']['outcome']}")
+                    st.caption(f"Priority {rule['priority']} → {rule['decision']['outcome']}")
+                    st.markdown("---")
 
 
 def section_stress_test():
-    """Section 2: Stress-Test Scenarios."""
-    st.header("2️⃣ Stress-Test Scenarios")
+    """Section 2: Generate Training Data & Stress-Test Scenarios."""
+    st.markdown('<div class="section-header">Generate Training Data</div>', unsafe_allow_html=True)
     
     if not st.session_state.rule_engine:
-        st.warning("⚠️ Please load rules first (Section 1)")
+        st.markdown('<div class="warning-card">Please load rules first in the Define System section.</div>', unsafe_allow_html=True)
         return
+    
+    st.markdown("""
+    Generate comprehensive synthetic datasets to train ML models and discover failure modes.
+    The system learns patterns from thousands of simulated scenarios, enabling intelligent
+    detection of anomalies and instabilities.
+    """)
+    
+    st.markdown("---")
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.subheader("Configure Scenario Generation")
+        st.markdown('<div class="subsection-header">Define Feature Space</div>', unsafe_allow_html=True)
         
-        # Feature specifications (example for credit risk)
-        st.markdown("**Define Feature Space:**")
+        st.markdown("""
+        Specify the input features your decision rules evaluate. Each feature requires a type
+        (continuous, discrete, or categorical) and valid range or values.
+        """)
         
-        num_features = st.number_input("Number of features", min_value=1, max_value=10, value=4)
+        num_features = st.number_input("Number of Features", min_value=1, max_value=10, value=4)
         
         feature_specs = []
         for i in range(num_features):
-            with st.expander(f"Feature {i+1}"):
-                fname = st.text_input(f"Name", value=f"feature_{i}", key=f"fname_{i}")
-                ftype = st.selectbox(f"Type", ["continuous", "discrete", "categorical"], key=f"ftype_{i}")
+            with st.expander(f"Feature {i+1} Configuration", expanded=(i==0)):
+                fname = st.text_input("Feature Name", value=f"feature_{i}", key=f"fname_{i}")
+                ftype = st.selectbox("Type", ["continuous", "discrete", "categorical"], key=f"ftype_{i}")
                 
                 if ftype in ["continuous", "discrete"]:
                     col_a, col_b = st.columns(2)
                     with col_a:
-                        fmin = st.number_input(f"Min", value=0.0, key=f"fmin_{i}")
+                        fmin = st.number_input("Minimum Value", value=0.0, key=f"fmin_{i}")
                     with col_b:
-                        fmax = st.number_input(f"Max", value=100.0, key=f"fmax_{i}")
+                        fmax = st.number_input("Maximum Value", value=100.0, key=f"fmax_{i}")
                     
                     feature_specs.append(
                         FeatureSpec(name=fname, type=ftype, range=(fmin, fmax))
                     )
                 else:
-                    values_str = st.text_input(f"Values (comma-separated)", value="A,B,C", key=f"fvals_{i}")
+                    values_str = st.text_input("Values (comma-separated)", value="A,B,C", key=f"fvals_{i}")
                     values = [v.strip() for v in values_str.split(',')]
                     feature_specs.append(
                         FeatureSpec(name=fname, type=ftype, values=values)
                     )
         
-        # Scenario generation options
-        st.markdown("**Generation Strategy:**")
+        st.session_state.feature_specs = feature_specs
         
-        generation_type = st.selectbox(
-            "Scenario Type",
-            ["Monte Carlo (Mixed)", "Normal Cases", "Boundary Cases", "Adversarial Cases"]
+        st.markdown('<div class="subsection-header">Generation Strategy</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        Choose how scenarios are generated. For ML training, we recommend starting with
+        a comprehensive training dataset that includes normal, boundary, and adversarial cases.
+        """)
+        
+        generation_mode = st.radio(
+            "Mode",
+            ["Training Dataset (Recommended)", "Custom Scenarios"],
+            horizontal=True
         )
         
-        n_scenarios = st.slider("Number of scenarios", 100, 5000, 1000)
+        if generation_mode == "Training Dataset (Recommended)":
+            n_scenarios = st.slider(
+                "Dataset Size", 
+                min_value=1000, 
+                max_value=20000, 
+                value=5000,
+                step=1000,
+                help="Larger datasets enable better ML model training"
+            )
+            
+            if st.button("Generate Training Dataset", type="primary"):
+                with st.spinner("Generating comprehensive training dataset..."):
+                    generator = ScenarioGenerator(feature_specs, random_seed=42)
+                    scenarios = generator.generate_training_dataset(n_scenarios)
+                    st.session_state.scenarios = scenarios
+                    st.markdown(
+                        f'<div class="success-card"><strong>Success:</strong> Generated {len(scenarios):,} training scenarios</div>',
+                        unsafe_allow_html=True
+                    )
         
-        if st.button("Generate Scenarios", type="primary"):
-            generator = ScenarioGenerator(feature_specs, random_seed=42)
+        else:
+            generation_type = st.selectbox(
+                "Scenario Type",
+                ["Monte Carlo (Mixed)", "Normal Cases", "Boundary Cases", "Adversarial Cases"]
+            )
             
-            if generation_type == "Monte Carlo (Mixed)":
-                scenarios = generator.generate_monte_carlo(n_scenarios)
-            elif generation_type == "Normal Cases":
-                scenarios = generator.generate(n_scenarios, ScenarioType.NORMAL)
-            elif generation_type == "Boundary Cases":
-                scenarios = generator.generate(n_scenarios, ScenarioType.BOUNDARY)
-            else:
-                scenarios = generator.generate(n_scenarios, ScenarioType.ADVERSARIAL)
+            n_scenarios = st.slider("Number of Scenarios", 100, 10000, 1000, step=100)
             
-            st.session_state.scenarios = scenarios
-            st.success(f"✅ Generated {len(scenarios)} scenarios")
+            if st.button("Generate Scenarios", type="primary"):
+                generator = ScenarioGenerator(feature_specs, random_seed=42)
+                
+                if generation_type == "Monte Carlo (Mixed)":
+                    scenarios = generator.generate_monte_carlo(n_scenarios)
+                elif generation_type == "Normal Cases":
+                    scenarios = generator.generate(n_scenarios, ScenarioType.NORMAL)
+                elif generation_type == "Boundary Cases":
+                    scenarios = generator.generate(n_scenarios, ScenarioType.BOUNDARY)
+                else:
+                    scenarios = generator.generate(n_scenarios, ScenarioType.ADVERSARIAL)
+                
+                st.session_state.scenarios = scenarios
+                st.markdown(
+                    f'<div class="success-card"><strong>Success:</strong> Generated {len(scenarios):,} scenarios</div>',
+                    unsafe_allow_html=True
+                )
     
     with col2:
         if st.session_state.scenarios:
-            st.metric("Scenarios Generated", len(st.session_state.scenarios))
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Scenarios Generated", f"{len(st.session_state.scenarios):,}")
+            st.markdown('</div>', unsafe_allow_html=True)
             
             # Preview scenarios
-            with st.expander("Preview Scenarios"):
+            with st.expander("Preview Sample Data"):
                 df_preview = pd.DataFrame(st.session_state.scenarios[:10])
-                st.dataframe(df_preview)
+                st.dataframe(df_preview, use_container_width=True)
 
 
 def section_discover_failures():
-    """Section 3: Discover Failure Modes."""
-    st.header("3️⃣ Discover Failure Modes")
+    """Section 3: Train Models & Discover Failure Modes."""
+    st.markdown('<div class="section-header">Intelligent Failure Discovery</div>', unsafe_allow_html=True)
     
     if not st.session_state.rule_engine or not st.session_state.scenarios:
-        st.warning("⚠️ Please load rules and generate scenarios first")
+        st.markdown('<div class="warning-card">Please load rules and generate scenarios first.</div>', unsafe_allow_html=True)
         return
     
-    col1, col2 = st.columns([3, 2])
+    st.markdown("""
+    This section executes your scenarios through the rule engine and trains ML models to discover
+    failure patterns. The system learns from the data, then identifies anomalies, clusters similar
+    failures, and tests for decision instability.
+    """)
+    
+    st.markdown("---")
+    
+    col1, col2 = st.columns([2, 1])
     
     with col1:
-        if st.button("Run Analysis", type="primary", key="run_analysis"):
-            with st.spinner("Executing scenarios..."):
-                # Execute scenarios
+        st.markdown('<div class="subsection-header">Execute & Train</div>', unsafe_allow_html=True)
+        
+        contamination = st.slider(
+            "Expected Anomaly Rate",
+            min_value=0.05,
+            max_value=0.30,
+            value=0.10,
+            step=0.05,
+            help="Percentage of scenarios expected to be anomalous"
+        )
+        
+        if st.button("Run Analysis & Training", type="primary", key="run_analysis"):
+            
+            # Step 1: Execute scenarios
+            with st.spinner("Step 1/4: Executing scenarios through rule engine..."):
                 executor = DecisionExecutor(st.session_state.rule_engine)
                 results_df = executor.execute_batch(st.session_state.scenarios)
                 st.session_state.results = results_df
                 st.session_state.executor = executor
+                st.markdown('<div class="success-card">✓ Executed all scenarios</div>', unsafe_allow_html=True)
             
-            with st.spinner("Detecting anomalies..."):
-                # Detect failures
+            # Step 2: Train ML models
+            with st.spinner("Step 2/4: Training ML models on scenario data..."):
                 detector = FailureDetector()
-                results_with_anomalies = detector.detect_anomalies(results_df, contamination=0.1)
+                training_summary = detector.train(results_df, contamination=contamination)
+                st.session_state.training_summary = training_summary
+                st.session_state.training_complete = True
+                st.markdown('<div class="success-card">✓ Models trained successfully</div>', unsafe_allow_html=True)
+            
+            # Step 3: Detect anomalies
+            with st.spinner("Step 3/4: Detecting anomalies and clustering failures..."):
+                results_with_anomalies = detector.detect_anomalies(results_df, contamination=contamination)
                 results_with_clusters = detector.discover_failure_clusters(results_df)
                 
                 st.session_state.failure_detector = detector
                 st.session_state.results = results_with_anomalies
+                st.markdown('<div class="success-card">✓ Anomalies and clusters identified</div>', unsafe_allow_html=True)
             
-            with st.spinner("Analyzing instability..."):
-                # Test instability on sample
-                sample_scenarios = st.session_state.scenarios[:50]  # Test 50 scenarios
+            # Step 4: Test instability
+            with st.spinner("Step 4/4: Testing decision instability..."):
+                sample_size = min(50, len(st.session_state.scenarios))
+                sample_scenarios = st.session_state.scenarios[:sample_size]
                 instabilities = detector.detect_instability(executor, sample_scenarios, n_perturbations=10)
+                st.markdown('<div class="success-card">✓ Instability analysis complete</div>', unsafe_allow_html=True)
             
-            st.success("✅ Analysis complete!")
+            st.markdown('<div class="success-card"><strong>Analysis Complete</strong> — All models trained and failures identified</div>', unsafe_allow_html=True)
     
     with col2:
+        if st.session_state.training_complete and st.session_state.training_summary:
+            st.markdown('<div class="info-card">', unsafe_allow_html=True)
+            st.markdown("**Training Summary**")
+            summary = st.session_state.training_summary
+            st.write(f"Scenarios: {summary['training_scenarios']:,}")
+            st.write(f"Features: {summary['n_features']}")
+            st.write(f"Model: {summary['model_type']}")
+            st.write(f"Clusters: {summary['n_clusters_discovered']}")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
         if st.session_state.failure_detector:
             summary = st.session_state.failure_detector.get_detection_summary()
             
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
             st.metric("Anomalies Found", summary.get('total_anomalies', 0))
             st.metric("Failure Clusters", summary.get('total_clusters', 0))
             st.metric("Unstable Scenarios", summary.get('total_unstable_scenarios', 0))
+            st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Display learned intelligence
+    if st.session_state.training_complete and st.session_state.failure_detector:
+        st.markdown("---")
+        st.markdown('<div class="subsection-header">Learned Intelligence</div>', unsafe_allow_html=True)
+        
+        with st.expander("View Training Insights", expanded=True):
+            insights = st.session_state.failure_detector.get_training_insights()
+            st.text(insights)
     
     # Display detailed results
     if st.session_state.results is not None:
-        st.subheader("Detection Results")
+        st.markdown("---")
+        st.markdown('<div class="subsection-header">Detection Results</div>', unsafe_allow_html=True)
         
-        tab1, tab2, tab3 = st.tabs(["Anomalies", "Clusters", "Decision Distribution"])
+        tab1, tab2, tab3 = st.tabs(["Anomalies", "Failure Clusters", "Decision Distribution"])
         
         with tab1:
             if 'is_anomaly' in st.session_state.results.columns:
                 anomalies = st.session_state.results[st.session_state.results['is_anomaly']]
-                st.write(f"**{len(anomalies)} anomalous scenarios detected**")
+                st.markdown(f"**{len(anomalies)} anomalous scenarios detected**")
                 
                 if len(anomalies) > 0:
+                    st.markdown("""
+                    Anomalies represent scenarios that deviate significantly from learned patterns.
+                    These are potential edge cases requiring review.
+                    """)
+                    
                     # Show top anomalies by score
                     top_anomalies = anomalies.nsmallest(10, 'anomaly_score')
-                    st.dataframe(top_anomalies[['scenario_id', 'decision', 'anomaly_score', 'confidence']])
+                    st.dataframe(
+                        top_anomalies[['scenario_id', 'decision', 'anomaly_score', 'confidence']],
+                        use_container_width=True
+                    )
         
         with tab2:
             if st.session_state.failure_detector and 'clusters' in st.session_state.failure_detector.detection_results:
                 clusters_df = st.session_state.failure_detector.detection_results['clusters']
-                st.dataframe(clusters_df)
+                if len(clusters_df) > 0:
+                    st.markdown("""
+                    Clusters group similar failure patterns together, revealing systematic issues
+                    rather than isolated edge cases.
+                    """)
+                    st.dataframe(clusters_df, use_container_width=True)
+                else:
+                    st.info("No distinct failure clusters found")
         
         with tab3:
             decision_dist = st.session_state.results['decision'].value_counts()
             
+            st.markdown("""
+            Decision distribution shows how scenarios are classified across different outcomes.
+            Highly concentrated distributions may indicate coverage gaps.
+            """)
+            
             fig = px.pie(
                 values=decision_dist.values,
                 names=decision_dist.index,
-                title="Decision Distribution"
+                title="Decision Distribution",
+                color_discrete_sequence=px.colors.sequential.Blues_r
+            )
+            fig.update_layout(
+                showlegend=True,
+                height=400
             )
             st.plotly_chart(fig, use_container_width=True)
 
 
 def section_risk_dashboard():
-    """Section 4: Risk Dashboard."""
-    st.header("4️⃣ Risk Dashboard")
+    """Section 4: Risk Assessment & Quantification."""
+    st.markdown('<div class="section-header">Risk Assessment</div>', unsafe_allow_html=True)
     
     if st.session_state.results is None:
-        st.warning("⚠️ Please run analysis first (Section 3)")
+        st.markdown('<div class="warning-card">Please complete analysis in the Train & Discover section first.</div>', unsafe_allow_html=True)
         return
+    
+    st.markdown("""
+    Quantify systemic risk across multiple dimensions. Our evaluation focuses on metrics
+    that matter for decision system robustness—not prediction accuracy.
+    """)
+    
+    st.markdown("---")
     
     # Calculate risk scores
     if st.button("Calculate Risk Scores", type="primary"):
-        scorer = RiskScorer()
-        
-        # Score different risk factors
-        if st.session_state.failure_detector:
-            instabilities = st.session_state.failure_detector.detection_results.get('instabilities', [])
-            scorer.score_instability(instabilities)
-        
-        if st.session_state.executor:
-            # Find boundaries
-            feature_cols = [col for col in st.session_state.results.columns if col.startswith('feature_')]
-            boundaries = []
-            for col in feature_cols[:3]:  # Analyze first 3 features
-                feature_name = col.replace('feature_', '')
-                bounds = st.session_state.executor.find_decision_boundaries(feature_name)
-                boundaries.extend(bounds)
+        with st.spinner("Analyzing risk across multiple dimensions..."):
+            scorer = RiskScorer()
             
-            scorer.score_conflict_density(st.session_state.results, boundaries)
-        
-        scorer.score_coverage_gaps(st.session_state.results)
-        scorer.score_decision_concentration(st.session_state.results)
-        scorer.score_confidence_variance(st.session_state.results)
-        
-        st.session_state.risk_scorer = scorer
+            # Score different risk factors
+            if st.session_state.failure_detector:
+                instabilities = st.session_state.failure_detector.detection_results.get('instabilities', [])
+                scorer.score_instability(instabilities)
+            
+            if st.session_state.executor:
+                # Find boundaries
+                feature_cols = [col for col in st.session_state.results.columns if col.startswith('feature_')]
+                boundaries = []
+                for col in feature_cols[:3]:  # Analyze first 3 features
+                    feature_name = col.replace('feature_', '')
+                    bounds = st.session_state.executor.find_decision_boundaries(feature_name)
+                    boundaries.extend(bounds)
+                
+                scorer.score_conflict_density(st.session_state.results, boundaries)
+            
+            scorer.score_coverage_gaps(st.session_state.results)
+            scorer.score_decision_concentration(st.session_state.results)
+            scorer.score_confidence_variance(st.session_state.results)
+            
+            st.session_state.risk_scorer = scorer
+            st.markdown('<div class="success-card">Risk assessment complete</div>', unsafe_allow_html=True)
     
     # Display risk dashboard
     if st.session_state.risk_scorer:
         composite = st.session_state.risk_scorer.calculate_composite_risk_score()
         
         # Overall risk score
-        st.subheader("Overall Risk Assessment")
+        st.markdown('<div class="subsection-header">Overall Assessment</div>', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
             severity = composite['overall_severity']
             severity_class = f"risk-{severity}"
-            st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
-            st.markdown(f'<div class="{severity_class}" style="font-size: 2rem;">{severity.upper()}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div>Overall Severity</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-card" style="text-align: center;">', unsafe_allow_html=True)
+            st.markdown(f'<div class="{severity_class}" style="font-size: 2.5rem; margin-bottom: 0.5rem;">{severity.upper()}</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color: #64748b;">Overall Severity</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
             score = composite['composite_risk_score']
-            st.metric("Composite Risk Score", f"{score:.2f}", help="Scale: 0.0 (low) to 1.0 (critical)")
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Composite Risk Score", f"{score:.3f}", help="0.0 = minimal risk, 1.0 = critical risk")
+            st.markdown('</div>', unsafe_allow_html=True)
         
         with col3:
-            st.metric("Risk Factors Analyzed", len(composite.get('risk_breakdown', {})))
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Dimensions Analyzed", len(composite.get('risk_breakdown', {})))
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
         
         # Risk breakdown
-        st.subheader("Risk Factor Breakdown")
+        st.markdown('<div class="subsection-header">Risk Factor Analysis</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        Each dimension contributes to overall system risk. High scores in any dimension
+        indicate potential vulnerabilities requiring attention.
+        """)
         
         breakdown = composite.get('risk_breakdown', {})
         if breakdown:
@@ -388,7 +733,7 @@ def section_risk_dashboard():
                 {
                     'Risk Factor': k.replace('_', ' ').title(),
                     'Severity': v['severity'],
-                    'Contribution': v['contribution']
+                    'Contribution': round(v['contribution'], 4)
                 }
                 for k, v in breakdown.items()
             ])
@@ -406,41 +751,56 @@ def section_risk_dashboard():
                     'critical': '#dc2626'
                 }
             )
+            fig.update_layout(
+                showlegend=True,
+                xaxis_title="",
+                yaxis_title="Risk Contribution",
+                height=400
+            )
             st.plotly_chart(fig, use_container_width=True)
         
         # Detailed scores
-        with st.expander("View Detailed Risk Scores"):
+        with st.expander("View Detailed Metrics"):
             st.json(composite['detailed_scores'])
 
 
 def section_what_if():
-    """Section 5: What-If Rule Repair."""
-    st.header("5️⃣ What-If Rule Repair")
+    """Section 5: Policy Repair & What-If Analysis."""
+    st.markdown('<div class="section-header">Policy Repair</div>', unsafe_allow_html=True)
     
     if not st.session_state.rule_engine:
-        st.warning("⚠️ Please load rules first")
+        st.markdown('<div class="warning-card">Please load rules first in the Define System section.</div>', unsafe_allow_html=True)
         return
+    
+    st.markdown("""
+    Test policy modifications before deployment. Simulate the impact of rule changes,
+    compare risk profiles, and make data-driven decisions about policy adjustments.
+    """)
+    
+    st.markdown("---")
     
     # Initialize repair engine if not done
     if st.session_state.repair_engine is None and st.session_state.rule_engine is not None:
         st.session_state.repair_engine = PolicyRepairEngine(st.session_state.rule_engine)
     
-    st.subheader("Simulate Rule Modifications")
+    st.markdown('<div class="subsection-header">Modification Options</div>', unsafe_allow_html=True)
     
     # Show tabs for different workflows
-    tab1, tab2, tab3 = st.tabs(["Manual Modification", "Auto-Suggestions", "Comparison"])
+    tab1, tab2, tab3 = st.tabs(["Manual Changes", "Suggested Improvements", "Impact Comparison"])
     
     with tab1:
-        st.markdown("### Manual Rule Modification")
+        st.markdown("""
+        Manually configure rule modifications and simulate their impact on system risk.
+        """)
         
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.markdown("**Select Rule to Modify:**")
+            st.markdown("**Select Rule**")
             
             if st.session_state.rule_engine.rules:
                 rule_ids = [r['rule_id'] for r in st.session_state.rule_engine.rules['rules']]
-                selected_rule_id = st.selectbox("Rule ID", rule_ids)
+                selected_rule_id = st.selectbox("Rule ID", rule_ids, label_visibility="collapsed")
                 
                 # Show current rule
                 selected_rule = next(
@@ -448,7 +808,7 @@ def section_what_if():
                     if r['rule_id'] == selected_rule_id
                 )
                 
-                with st.expander("View Current Rule"):
+                with st.expander("View Current Rule Configuration"):
                     st.json(selected_rule)
                 
                 st.markdown("**Modification Type:**")
@@ -698,45 +1058,51 @@ def main():
     init_session_state()
     render_header()
     
-    # Sidebar navigation
+    # Premium sidebar navigation
     with st.sidebar:
-        st.title("Navigation")
+        st.markdown("### Navigation")
         section = st.radio(
-            "Go to:",
+            "Section",
             [
-                "1️⃣ Define System",
-                "2️⃣ Stress-Test",
-                "3️⃣ Discover Failures",
-                "4️⃣ Risk Dashboard",
-                "5️⃣ What-If Analysis"
-            ]
+                "Overview",
+                "Define System",
+                "Generate Data",
+                "Train & Discover",
+                "Risk Assessment",
+                "Policy Repair"
+            ],
+            label_visibility="collapsed"
         )
         
         st.markdown("---")
-        st.markdown("### About")
-        st.info("""
-        **Policy Intelligence Engine**
         
-        Stress-tests human decision rules to discover:
-        - Hidden failures
-        - Rule conflicts
-        - Decision instability
-        - Systemic risks
+        st.markdown("### System")
+        st.markdown("""
+        Enterprise decision-intelligence platform for discovering hidden failures 
+        in rule-based systems.
+        
+        **Capabilities:**
+        - Stress testing at scale
+        - ML-powered failure discovery
+        - Risk quantification
+        - Policy optimization
         """)
         
         st.markdown("---")
-        st.caption("Built for enterprise policy analysis")
+        st.caption("Version 2.0 | Enterprise Grade")
     
     # Render selected section
-    if "Define System" in section:
+    if section == "Overview":
+        section_landing()
+    elif section == "Define System":
         section_define_system()
-    elif "Stress-Test" in section:
+    elif section == "Generate Data":
         section_stress_test()
-    elif "Discover Failures" in section:
+    elif section == "Train & Discover":
         section_discover_failures()
-    elif "Risk Dashboard" in section:
+    elif section == "Risk Assessment":
         section_risk_dashboard()
-    elif "What-If" in section:
+    elif section == "Policy Repair":
         section_what_if()
 
 
