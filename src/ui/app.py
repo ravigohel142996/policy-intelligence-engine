@@ -34,7 +34,7 @@ from policy_repair import PolicyRepairEngine, RuleModification, ModificationType
 # Page configuration
 st.set_page_config(
     page_title="Policy Intelligence Engine",
-    page_icon="📊",
+    page_icon="■",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -44,185 +44,304 @@ st.markdown("""
 <style>
     /* Global Styles - Clean Enterprise Aesthetic */
     .main {
-        background-color: #f8fafc;
-        padding: 1.5rem;
+        background-color: #ffffff;
+        padding: 1rem 1.5rem;
     }
     
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem;
         max-width: 100%;
     }
     
     /* Typography Hierarchy */
     .enterprise-title {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 1.75rem;
+        font-weight: 600;
         color: #0f172a;
-        letter-spacing: -0.03em;
-        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
     
     .enterprise-subtitle {
-        font-size: 1rem;
+        font-size: 0.875rem;
         color: #64748b;
         font-weight: 400;
-        margin-bottom: 2rem;
-        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        line-height: 1.4;
         letter-spacing: 0.01em;
     }
     
+    /* System Alert Band - Top Priority */
+    .alert-band {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-left: 4px solid #64748b;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    }
+    
+    .alert-band-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .alert-band-critical {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-left: 4px solid #dc2626;
+    }
+    
+    .alert-band-ok {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-left: 4px solid #22c55e;
+    }
+    
+    .alert-band-text {
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 500;
+        line-height: 1.5;
+        margin: 0;
+    }
+    
+    /* Primary Signal - DOMINANT */
+    .primary-signal-container {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 3rem 2rem;
+        margin: 2rem 0;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    }
+    
+    .primary-signal-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+    }
+    
+    .primary-signal-value {
+        font-size: 4rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+        line-height: 1;
+        letter-spacing: -0.03em;
+    }
+    
+    .primary-signal-reason {
+        font-size: 1rem;
+        color: #475569;
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
     .section-header {
-        font-size: 1.75rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: #1e293b;
-        margin-top: 2rem;
+        margin-top: 3rem;
         margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid #cbd5e1;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #cbd5e1;
+        letter-spacing: -0.01em;
     }
     
     .subsection-header {
-        font-size: 1.25rem;
+        font-size: 1rem;
         font-weight: 600;
         color: #334155;
         margin-top: 2rem;
         margin-bottom: 1rem;
-        letter-spacing: -0.01em;
+        letter-spacing: -0.005em;
     }
     
-    /* Status Bar */
+    /* Status Bar - Clean Minimal */
     .status-bar-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        padding: 2rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px 0 rgb(0 0 0 / 0.06);
-        margin-bottom: 2rem;
+        background: #f8fafc;
+        padding: 1.25rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
         border: 1px solid #e2e8f0;
     }
     
-    /* Executive Summary Cards */
-    .executive-summary-section {
-        margin-bottom: 2rem;
-    }
-    
-    .executive-card {
+    /* Supporting Signals - With Reasoning */
+    .supporting-signal-card {
         background: white;
-        padding: 2rem 1.5rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
         border: 1px solid #e2e8f0;
-        text-align: center;
-        transition: all 0.2s ease;
-        min-height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+        height: 100%;
     }
     
-    .executive-card:hover {
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        transform: translateY(-2px);
-    }
-    
-    .executive-card-value {
-        font-size: 3rem;
+    .signal-value {
+        font-size: 2.25rem;
         font-weight: 700;
         color: #0f172a;
         margin-bottom: 0.5rem;
         line-height: 1;
     }
     
-    .executive-card-label {
-        font-size: 0.875rem;
+    .signal-label {
+        font-size: 0.75rem;
         color: #64748b;
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        margin-bottom: 0.75rem;
+    }
+    
+    .signal-reason {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.5;
+        font-style: italic;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
     }
     
     /* Card Styles */
     .metric-card {
         background: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
+        padding: 1.25rem;
+        border-radius: 0.5rem;
         border: 1px solid #e2e8f0;
         margin-bottom: 1rem;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
     }
     
     .info-card {
-        background: #eff6ff;
-        border-left: 4px solid #3b82f6;
-        padding: 1.25rem 1.5rem;
-        border-radius: 0.5rem;
+        background: #f8fafc;
+        border-left: 3px solid #64748b;
+        padding: 1rem 1.25rem;
+        border-radius: 0.375rem;
         margin: 1rem 0;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.02);
     }
     
     .success-card {
         background: #f0fdf4;
-        border-left: 4px solid #22c55e;
-        padding: 1.25rem 1.5rem;
-        border-radius: 0.5rem;
+        border-left: 3px solid #22c55e;
+        padding: 1rem 1.25rem;
+        border-radius: 0.375rem;
         margin: 1rem 0;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.02);
     }
     
     .warning-card {
-        background: #fffbeb;
-        border-left: 4px solid #f59e0b;
-        padding: 1.25rem 1.5rem;
-        border-radius: 0.5rem;
+        background: #fef3c7;
+        border-left: 3px solid #f59e0b;
+        padding: 1rem 1.25rem;
+        border-radius: 0.375rem;
         margin: 1rem 0;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.02);
+    }
+    
+    /* Key Insights List */
+    .insights-container {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .insight-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        color: #334155;
+        line-height: 1.6;
+    }
+    
+    .insight-item:last-child {
+        border-bottom: none;
+    }
+    
+    .insight-bullet {
+        color: #64748b;
+        margin-right: 0.5rem;
+        font-weight: 600;
+    }
+    
+    /* Next Action Box */
+    .next-action-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin: 2rem 0 1rem 0;
+    }
+    
+    .next-action-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.75rem;
+    }
+    
+    .next-action-text {
+        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 500;
+        line-height: 1.6;
     }
     
     /* Risk Severity Colors - Professional */
     .risk-critical {
         color: #991b1b;
-        font-weight: 700;
+        font-weight: 600;
     }
     .risk-high {
         color: #c2410c;
-        font-weight: 700;
+        font-weight: 600;
     }
     .risk-medium {
         color: #b45309;
-        font-weight: 700;
+        font-weight: 600;
     }
     .risk-low {
         color: #047857;
-        font-weight: 700;
+        font-weight: 600;
     }
     
     /* Buttons - Subtle */
     .stButton>button {
-        background-color: #0f172a;
+        background-color: #1e293b;
         color: white;
         border: none;
-        border-radius: 0.5rem;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.2s;
+        border-radius: 0.375rem;
+        padding: 0.625rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.15s;
         box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     }
     
     .stButton>button:hover {
-        background-color: #1e293b;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        transform: translateY(-1px);
+        background-color: #334155;
+        box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1);
     }
     
     /* Metrics styling */
     [data-testid="stMetricValue"] {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 1.5rem;
+        font-weight: 600;
         color: #0f172a;
     }
     
     [data-testid="stMetricLabel"] {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         color: #64748b;
         font-weight: 600;
         text-transform: uppercase;
@@ -231,43 +350,57 @@ st.markdown("""
     
     /* Spacing and Dividers */
     .spacer {
-        margin: 2rem 0;
+        margin: 1.5rem 0;
     }
     
     hr {
         border: none;
-        border-top: 2px solid #e2e8f0;
-        margin: 2.5rem 0;
+        border-top: 1px solid #e2e8f0;
+        margin: 2rem 0;
     }
     
     /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    header {visibility: hidden;}
     
     /* Clean Dataframe Styles */
     .dataframe {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
+        border-radius: 0.375rem;
     }
     
     /* Expander styling */
     .streamlit-expanderHeader {
         background-color: white;
         border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
+        border-radius: 0.375rem;
         font-weight: 500;
+        font-size: 0.875rem;
     }
     
     /* Sidebar styling */
     [data-testid="stSidebar"] {
         background-color: #f8fafc;
         border-right: 1px solid #e2e8f0;
+        padding-top: 2rem;
+    }
+    
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+        font-size: 0.875rem;
     }
     
     /* Remove extra padding */
     .element-container {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Radio buttons - cleaner */
+    .stRadio > label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #334155;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -320,19 +453,17 @@ def render_status_bar():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        rules_loaded = "Yes" if st.session_state.rule_engine else "No"
+        rules_loaded = "Active" if st.session_state.rule_engine else "Not Loaded"
         st.metric(
-            label="Rules Loaded",
-            value=rules_loaded,
-            delta=None
+            label="Rule System",
+            value=rules_loaded
         )
     
     with col2:
-        models_trained = "Yes" if st.session_state.training_complete else "No"
+        models_trained = "Trained" if st.session_state.training_complete else "Pending"
         st.metric(
-            label="Models Trained",
-            value=models_trained,
-            delta=None
+            label="ML Models",
+            value=models_trained
         )
     
     with col3:
@@ -341,9 +472,8 @@ def render_status_bar():
         else:
             coverage_pct = 0
         st.metric(
-            label="Analysis Coverage",
-            value=f"{coverage_pct}%",
-            delta=None
+            label="Coverage",
+            value=f"{coverage_pct}%"
         )
     
     with col4:
@@ -352,12 +482,11 @@ def render_status_bar():
             composite = st.session_state.risk_scorer.calculate_composite_risk_score()
             risk_level = composite['overall_severity'].upper()
         else:
-            risk_level = "UNKNOWN"
+            risk_level = "—"
         
         st.metric(
-            label="Overall Risk Level",
-            value=risk_level,
-            delta=None
+            label="Risk Level",
+            value=risk_level
         )
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -365,103 +494,222 @@ def render_status_bar():
 
 def section_landing():
     """Landing / Overview section - Command Center view."""
-    st.markdown('<div class="section-header">System Overview</div>', unsafe_allow_html=True)
     
-    # Executive Summary Cards
-    st.markdown('<div class="executive-summary-section">', unsafe_allow_html=True)
+    # 1. SYSTEM ALERT BAND (TOP) - Most important insight
+    alert_class = "alert-band-ok"
+    alert_message = "No critical conflicts detected. Monitoring instability zones."
+    
+    if st.session_state.risk_scorer:
+        composite = st.session_state.risk_scorer.calculate_composite_risk_score()
+        severity = composite['overall_severity']
+        
+        if severity == 'critical':
+            alert_class = "alert-band-critical"
+            alert_message = "Critical decision instability detected. Immediate review required."
+        elif severity == 'high':
+            alert_class = "alert-band-warning"
+            alert_message = "Decision instability detected under boundary stress conditions."
+        elif severity == 'medium':
+            alert_class = "alert-band-warning"
+            alert_message = "Moderate risk factors identified. Review recommended."
+        elif st.session_state.failure_detector:
+            summary = st.session_state.failure_detector.get_detection_summary()
+            if summary.get('total_unstable_scenarios', 0) > 0:
+                alert_class = "alert-band"
+                alert_message = "Minor instability detected during stress testing. Continue monitoring."
+    
+    st.markdown(f'<div class="{alert_class}"><p class="alert-band-text">{alert_message}</p></div>', unsafe_allow_html=True)
+    
+    # 2. PRIMARY SYSTEM SIGNAL (DOMINANT)
+    st.markdown('<div class="primary-signal-container">', unsafe_allow_html=True)
+    st.markdown('<div class="primary-signal-title">Overall Decision Risk</div>', unsafe_allow_html=True)
+    
+    if st.session_state.risk_scorer:
+        composite = st.session_state.risk_scorer.calculate_composite_risk_score()
+        severity = composite['overall_severity'].upper()
+        
+        # Determine reason based on analysis
+        reason = "Analysis complete. System evaluated across multiple risk dimensions."
+        if st.session_state.failure_detector:
+            summary = st.session_state.failure_detector.get_detection_summary()
+            unstable = summary.get('total_unstable_scenarios', 0)
+            anomalies = summary.get('total_anomalies', 0)
+            
+            if unstable > 10:
+                reason = "Instability detected during boundary stress testing. Multiple scenarios show decision sensitivity."
+            elif anomalies > 5:
+                reason = "Anomalous patterns discovered via ML clustering on adversarial scenarios."
+            else:
+                reason = "System shows stable behavior. No significant failure modes detected."
+    else:
+        severity = "NOT ANALYZED"
+        reason = "Complete analysis in Discover Failures section to assess system risk."
+    
+    st.markdown(f'<div class="primary-signal-value">{severity}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="primary-signal-reason">Reason: {reason}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 3. SUPPORTING SIGNALS (SECONDARY) - 4 metrics with reasoning
+    st.markdown('<div class="subsection-header" style="margin-top: 2.5rem;">Supporting Signals</div>', unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         failure_count = 0
+        failure_reason = "No analysis performed yet"
+        
         if st.session_state.failure_detector:
             summary = st.session_state.failure_detector.get_detection_summary()
             failure_count = summary.get('total_anomalies', 0)
+            
+            if failure_count > 0:
+                failure_reason = "Detected via anomaly clustering on adversarial scenarios"
+            else:
+                failure_reason = "No anomalous patterns discovered in stress tests"
         
-        st.markdown('<div class="executive-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="executive-card-value">{failure_count}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="executive-card-label">Failure Modes Discovered</div>', unsafe_allow_html=True)
+        st.markdown('<div class="supporting-signal-card">', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-label">Failure Modes Discovered</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-value">{failure_count}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-reason">{failure_reason}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
         conflict_count = 0
-        if st.session_state.results is not None:
-            # Estimate conflicts based on overlapping rules
-            conflict_count = 0  # Simplified for now
+        conflict_reason = "No boundary analysis performed"
         
-        st.markdown('<div class="executive-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="executive-card-value">{conflict_count}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="executive-card-label">Rule Conflicts Detected</div>', unsafe_allow_html=True)
+        if st.session_state.results is not None and st.session_state.executor:
+            # Estimate conflicts based on decision boundaries
+            try:
+                feature_cols = [col for col in st.session_state.results.columns if col.startswith('feature_')]
+                if feature_cols:
+                    boundaries = st.session_state.executor.find_decision_boundaries(
+                        feature_cols[0].replace('feature_', '')
+                    )
+                    conflict_count = len(boundaries)
+                    
+                    if conflict_count > 0:
+                        conflict_reason = "Overlapping decision boundaries identified"
+                    else:
+                        conflict_reason = "No direct rule conflicts detected"
+            except:
+                conflict_reason = "Boundary detection not available"
+        
+        st.markdown('<div class="supporting-signal-card">', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-label">Rule Conflicts Detected</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-value">{conflict_count}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-reason">{conflict_reason}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col3:
         instability_index = 0.0
+        instability_reason = "Perturbation tests not executed"
+        
         if st.session_state.failure_detector:
             summary = st.session_state.failure_detector.get_detection_summary()
-            instability_index = summary.get('total_unstable_scenarios', 0) / max(1, summary.get('total_scenarios_tested', 1))
+            total_tested = summary.get('total_scenarios_tested', 1)
+            unstable = summary.get('total_unstable_scenarios', 0)
+            instability_index = unstable / max(1, total_tested)
+            
+            if instability_index > 0.15:
+                instability_reason = "High sensitivity to input perturbations detected"
+            elif instability_index > 0.05:
+                instability_reason = "Moderate instability under stress conditions"
+            else:
+                instability_reason = "Stable decisions across perturbation tests"
         
-        st.markdown('<div class="executive-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="executive-card-value">{instability_index:.2%}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="executive-card-label">Instability Index</div>', unsafe_allow_html=True)
+        st.markdown('<div class="supporting-signal-card">', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-label">Instability Index</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-value">{instability_index:.1%}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-reason">{instability_reason}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col4:
-        high_impact_count = 0
-        if st.session_state.results is not None and 'is_anomaly' in st.session_state.results.columns:
-            high_impact_count = st.session_state.results['is_anomaly'].sum()
+        coverage_pct = 0
+        coverage_reason = "Scenario generation required"
         
-        st.markdown('<div class="executive-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="executive-card-value">{high_impact_count}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="executive-card-label">High-Impact Scenarios</div>', unsafe_allow_html=True)
+        if st.session_state.results is not None and st.session_state.scenarios:
+            coverage_pct = int((len(st.session_state.results) / len(st.session_state.scenarios)) * 100)
+            
+            if coverage_pct >= 100:
+                coverage_reason = "Complete scenario analysis executed"
+            elif coverage_pct >= 50:
+                coverage_reason = "Partial analysis completed"
+            else:
+                coverage_reason = "Initial analysis phase"
+        
+        st.markdown('<div class="supporting-signal-card">', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-label">Analysis Coverage</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-value">{coverage_pct}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-reason">{coverage_reason}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
+    # 4. KEY INSIGHTS SECTION
+    st.markdown('<div class="subsection-header" style="margin-top: 2.5rem;">Key Insights</div>', unsafe_allow_html=True)
+    
+    insights = []
+    
+    if st.session_state.failure_detector:
+        summary = st.session_state.failure_detector.get_detection_summary()
+        
+        # Generate intelligence-focused insights
+        if summary.get('total_anomalies', 0) > 0:
+            insights.append("Anomalous decision patterns emerge primarily in boundary regions")
+        else:
+            insights.append("No distinct failure clusters identified across scenario space")
+        
+        unstable = summary.get('total_unstable_scenarios', 0)
+        if unstable > 10:
+            insights.append("Most failures emerge near threshold boundaries under perturbation")
+        elif unstable > 0:
+            insights.append("Minor instability detected in edge case scenarios")
+        else:
+            insights.append("System demonstrates stable behavior across perturbation tests")
+        
+        if summary.get('total_clusters', 0) > 1:
+            insights.append(f"Multiple distinct failure modes discovered requiring separate mitigation")
+        
+        if st.session_state.risk_scorer:
+            composite = st.session_state.risk_scorer.calculate_composite_risk_score()
+            if composite['overall_severity'] in ['medium', 'high', 'critical']:
+                insights.append("Risk concentration detected in specific decision regions")
+    else:
+        insights = [
+            "System analysis not yet performed",
+            "Run stress tests to generate behavioral insights",
+            "ML models require training data from scenario execution"
+        ]
+    
+    st.markdown('<div class="insights-container">', unsafe_allow_html=True)
+    for insight in insights:
+        st.markdown(f'<div class="insight-item"><span class="insight-bullet">▸</span>{insight}</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown("---")
+    # 5. NEXT ACTION GUIDANCE
+    st.markdown('<div class="subsection-header" style="margin-top: 2.5rem;">Recommended Next Actions</div>', unsafe_allow_html=True)
     
-    # Condensed information in expandable sections
-    col1, col2 = st.columns([2, 1])
+    next_action = "Begin by defining your decision system in Define System section"
     
-    with col1:
-        st.markdown('<div class="subsection-header">System Capabilities</div>', unsafe_allow_html=True)
+    if st.session_state.risk_scorer:
+        composite = st.session_state.risk_scorer.calculate_composite_risk_score()
+        severity = composite['overall_severity']
         
-        with st.expander("What This System Does"):
-            st.markdown("""
-            Traditional testing validates expected behavior. This system discovers what you didn't anticipate.
-            
-            **Key Capabilities:**
-            - Rule Conflicts: Overlapping conditions producing inconsistent decisions
-            - Decision Instability: Small input changes causing dramatic outcome shifts  
-            - Coverage Gaps: Unhandled edge cases falling through the cracks
-            - Systemic Risk: Failure modes that only emerge under stress or at scale
-            
-            Uses AI to stress-test rules across thousands of simulated scenarios.
-            """)
-        
-        with st.expander("Why Failure Discovery Over Prediction"):
-            st.markdown("""
-            This is an intelligence system designed to find what breaks:
-            
-            - Measures instability, conflict density, and risk concentration
-            - Generates adversarial scenarios that don't exist yet
-            - Provides explainable root causes for every finding
-            
-            **Goal**: Find failures before they impact operations.
-            """)
+        if severity == 'critical':
+            next_action = "Immediate action required: Review boundary conditions in high-risk policy rules"
+        elif severity in ['high', 'medium']:
+            next_action = "Review unstable regions in Risk Dashboard and test policy modifications"
+        else:
+            next_action = "System shows healthy risk profile. Consider expanding scenario coverage"
+    elif st.session_state.failure_detector:
+        next_action = "Proceed to Risk Dashboard to quantify and assess discovered failure modes"
+    elif st.session_state.scenarios:
+        next_action = "Execute analysis in Discover Failures section to identify systemic risks"
+    elif st.session_state.rule_engine:
+        next_action = "Generate comprehensive stress test scenarios in Stress Test section"
     
-    with col2:
-        st.markdown('<div class="subsection-header">Next Steps</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.markdown("""
-        1. Define decision system
-        2. Generate test scenarios  
-        3. Train ML models
-        4. Discover failures
-        5. Assess risk
-        6. Test policy repairs
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="next-action-container">', unsafe_allow_html=True)
+    st.markdown('<div class="next-action-title">What to do next</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="next-action-text">{next_action}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 def section_define_system():
@@ -1139,7 +1387,7 @@ def main():
     with st.sidebar:
         st.markdown("### Navigation")
         section = st.radio(
-            "Section",
+            "Go to section",
             [
                 "Overview",
                 "Define System",
