@@ -1118,7 +1118,7 @@ def section_what_if():
     st.markdown('<div class="section-header">Policy Repair</div>', unsafe_allow_html=True)
     
     if not st.session_state.rule_engine:
-        st.markdown('<div class="warning-card">Please load rules first in the Define System section.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="warning-card">Load rules first in Define System section.</div>', unsafe_allow_html=True)
         return
     
     # Initialize repair engine if not done
@@ -1230,7 +1230,7 @@ def section_what_if():
                             st.session_state.modification_results = impact
                             st.success("Impact simulation complete")
                     else:
-                        st.error("Please run analysis in Discover Failures section first")
+                        st.error("Run analysis in Discover Failures section first")
         
         with col2:
             st.markdown("**Simulation Results:**")
@@ -1335,7 +1335,7 @@ def section_what_if():
                                     delta_color="inverse"
                                 )
         else:
-            st.info("Run failure detection analysis in Discover Failures section to generate suggestions")
+            st.info("Run failure detection analysis in Discover Failures section")
     
     with tab3:
         st.markdown("**Compare Multiple Modifications**")
@@ -1373,7 +1373,7 @@ def section_what_if():
             
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Simulate a modification in the Manual Changes tab to see comparison")
+            st.info("Simulate a modification in Manual Changes tab")
 
 
 def main():
